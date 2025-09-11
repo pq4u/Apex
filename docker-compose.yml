@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: f1-timescaledb
+    environment:
+      POSTGRES_DB: apex_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - f1_data:/var/lib/postgresql/data
+      - ./setup-timescale.sql:/docker-entrypoint-initdb.d/20-timescale.sql
+
+volumes:
+  f1_data:
