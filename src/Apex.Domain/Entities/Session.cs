@@ -7,8 +7,8 @@ public class Session
     public int Key { get; set; }
     public string Type { get; set; }
     public string Name { get; set; }
-    public DateTime? DateStart { get; set; }
-    public DateTime? DateEnd { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
     public string GmtOffset { get; set; }
     public string? Status { get; set; }
 

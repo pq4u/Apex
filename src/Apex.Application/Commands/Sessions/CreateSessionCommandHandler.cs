@@ -17,18 +17,19 @@ public class CreateSessionCommandHandler : ICommandHandler<CreateSessionCommand>
     {
         var result = await _sessionManagementService.EnsureSessionExistsAsync(command.SessionKey, cancellationToken);
 
-        if (!result.IsSuccess)
-        {
-            throw new InvalidOperationException($"Session creation failed: {result.ErrorMessage}");
-        }
-
         if (result.AlreadyExisted)
         {
             Log.Information("Session {SessionKey} already existed", command.SessionKey);
+            return;
         }
         else
         {
             Log.Information("Successfully created session {SessionKey}", command.SessionKey);
+        }
+        
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Session creation failed: {result.ErrorMessage}");
         }
     }
 }

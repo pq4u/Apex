@@ -16,7 +16,7 @@ public class IngestCarDataCommandHandler : ICommandHandler<IngestCarDataCommand>
 
     public async Task HandleAsync(IngestCarDataCommand command, CancellationToken cancellationToken = default)
     {
-        var request = new TelemetryIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId);
+        var request = new TelemetryIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId, command.StartDate);
 
         var result = await _ingestionService.IngestDriverTelemetryAsync(request, cancellationToken);
 

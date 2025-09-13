@@ -1,4 +1,5 @@
 ﻿using Apex.Application.Abstractions;
+using Apex.Application.Commands.Drivers;
 using Apex.Application.Commands.Laps;
 using Apex.Application.Commands.Sessions;
 using Apex.Application.Commands.Telemetry;
@@ -25,7 +26,7 @@ public class DataIngestionWorker : BackgroundService
     {
         Log.Information("Data Ingestion Worker started");
 
-        var sessionKey = 9928;
+        var sessionKey = 7783;
 
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -58,8 +59,8 @@ public class DataIngestionWorker : BackgroundService
                 throw new SessionCannotBeCreatedOrFound(sessionKey);
             }
 
-            //var ingestDriversHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestDriversCommand>>();
-            //await ingestDriversHandler.HandleAsync(new IngestDriversCommand(sessionKey, session.Id), cancellationToken);
+            var ingestDriversHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestDriversCommand>>();
+            await ingestDriversHandler.HandleAsync(new IngestDriversCommand(sessionKey, session.Id), cancellationToken);
 
             var getDriversHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>>();
             var drivers = await getDriversHandler.HandleAsync(new GetSessionDriversQuery(session.Id), cancellationToken);
@@ -84,7 +85,7 @@ public class DataIngestionWorker : BackgroundService
 
                 try
                 {
-                    await IngestDriverDataSafelyAsync(ingestCarDataHandler, sessionKey, session.Id, driver, cancellationToken);
+                    await IngestDriverDataSafelyAsync(ingestCarDataHandler, sessionKey, session.Id, driver, session.StartDate, cancellationToken);
                     Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
                 }
                 catch (Exception ex)
@@ -103,11 +104,11 @@ public class DataIngestionWorker : BackgroundService
     }
 
     private async Task IngestDriverDataSafelyAsync(ICommandHandler<IngestCarDataCommand> handler,
-        int sessionKey, int sessionId, Driver driver, CancellationToken cancellationToken)
+        int sessionKey, int sessionId, Driver driver, DateTime startDate, CancellationToken cancellationToken)
     {
         try
         {
-            await handler.HandleAsync(new IngestCarDataCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id), cancellationToken);
+            await handler.HandleAsync(new IngestCarDataCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id, startDate), cancellationToken);
         }
         catch (Exception ex)
         {

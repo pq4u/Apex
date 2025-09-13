@@ -59,7 +59,7 @@ public class TelemetryIngestionService : ITelemetryIngestionService
     private async Task IngestTelemetryBatches(TelemetryIngestionRequest request, TelemetryIngestionState state, CancellationToken cancellationToken)
     {
         var interval = TimeSpan.FromMinutes(_options.BatchIntervalMinutes);
-        var startDate = DateTime.ParseExact(_options.DefaultStartDate, "yyyy-MM-dd", CultureInfo.InvariantCulture).ToUniversalTime();
+        var startDate = request.StartDate;
         var endDate = startDate + interval;
 
         var carDataBatch = new List<CarData>();

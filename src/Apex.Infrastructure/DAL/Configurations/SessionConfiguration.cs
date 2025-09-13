@@ -26,6 +26,10 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
         builder.Property(e => e.Name)
             .HasMaxLength(100);
 
+        builder.Property(e => e.StartDate);
+
+        builder.Property(e => e.EndDate);
+        
         builder.Property(e => e.GmtOffset)
             .HasMaxLength(10);
 

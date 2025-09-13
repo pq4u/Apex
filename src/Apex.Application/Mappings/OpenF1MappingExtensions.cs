@@ -25,8 +25,8 @@ public static class OpenF1MappingExtensions
         Key = dto.Session_Key,
         Type = dto.Session_Type,
         Name = dto.Session_Name,
-        DateStart = dto.Date_Start.ToUniversalTime(),
-        DateEnd = dto.Date_End.ToUniversalTime(),
+        StartDate = dto.Date_Start.ToUniversalTime(),
+        EndDate = dto.Date_End.ToUniversalTime(),
         GmtOffset = dto.Gmt_Offset,
         Status = dto.Session_Status
     };
