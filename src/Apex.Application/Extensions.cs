@@ -30,9 +30,9 @@ public static class Extensions
 
     private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<TelemetryIngestionOptions>(options =>
+        services.Configure<IngestionOptions>(options =>
         {
-            configuration.GetSection(TelemetryIngestionOptions.SectionName).Bind(options);
+            configuration.GetSection(IngestionOptions.SectionName).Bind(options);
         });
 
         services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();

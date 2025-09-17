@@ -17,10 +17,10 @@ public class TelemetryIngestionService : ITelemetryIngestionService
 {
     private readonly ITelemetryRepository _telemetryRepository;
     private readonly IOpenF1ApiClient _apiClient;
-    private readonly TelemetryIngestionOptions _options;
+    private readonly IngestionOptions _options;
 
     public TelemetryIngestionService(ITelemetryRepository telemetryRepository,
-        IOpenF1ApiClient apiClient, IOptions<TelemetryIngestionOptions> options)
+        IOpenF1ApiClient apiClient, IOptions<IngestionOptions> options)
     {
         _telemetryRepository = telemetryRepository;
         _apiClient = apiClient;
