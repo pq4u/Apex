@@ -9,12 +9,12 @@ using Serilog;
 
 namespace Apex.Application.Services;
 
-public class LapService : ILapService
+public class LapIngestionService : ILapIngestionService
 {
     private readonly ILapRepository _lapRepository;
     private readonly IOpenF1ApiClient _apiClient;
     private readonly IngestionOptions _options;
-    public LapService(ILapRepository lapRepository, IOpenF1ApiClient apiClient, IOptions<IngestionOptions> options)
+    public LapIngestionService(ILapRepository lapRepository, IOpenF1ApiClient apiClient, IOptions<IngestionOptions> options)
     {
         _lapRepository = lapRepository;
         _apiClient = apiClient;

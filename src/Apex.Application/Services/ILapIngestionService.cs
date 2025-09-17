@@ -3,7 +3,7 @@ using Apex.Domain.Results;
 
 namespace Apex.Application.Services;
 
-public interface ILapService
+public interface ILapIngestionService
 {
     Task<LapIngestionResult> IngestLapsAsync(LapIngestionRequest request, CancellationToken cancellationToken = default);
 }

@@ -7,17 +7,17 @@ namespace Apex.Application.Commands.Laps;
 
 public class IngestLapsCommandHandler : ICommandHandler<IngestLapsCommand>
 {
-    private readonly ILapService _lapService;
+    private readonly ILapIngestionService _lapIngestionService;
 
-    public IngestLapsCommandHandler(ILapService lapService)
+    public IngestLapsCommandHandler(ILapIngestionService lapIngestionService)
     {
-        _lapService = lapService;
+        _lapIngestionService = lapIngestionService;
     }
 
     public async Task HandleAsync(IngestLapsCommand command, CancellationToken cancellationToken = default)
     {
         var request = new LapIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId);
-        var result = await _lapService.IngestLapsAsync(request, cancellationToken);
+        var result = await _lapIngestionService.IngestLapsAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
         {

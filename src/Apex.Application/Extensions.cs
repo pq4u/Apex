@@ -38,7 +38,7 @@ public static class Extensions
         services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
         services.AddScoped<ISessionManagementService, SessionManagementService>();
         services.AddScoped<IDriverAssociationService, DriverAssociationService>();
-        services.AddScoped<ILapService, LapService>();
+        services.AddScoped<ILapIngestionService, LapIngestionService>();
         services.AddScoped<IMeetingIngestionService, MeetingIngestionService>();
 
         return services;
