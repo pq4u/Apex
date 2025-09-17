@@ -1,6 +1,7 @@
 ﻿using Apex.Application.Abstractions;
 using Apex.Application.Commands.Drivers;
 using Apex.Application.Commands.Laps;
+using Apex.Application.Commands.Meetings;
 using Apex.Application.Commands.Sessions;
 using Apex.Application.Commands.Telemetry;
 using Apex.Application.Queries.Drivers;
@@ -32,6 +33,7 @@ public class DataIngestionWorker : BackgroundService
         {
             try
             {
+                await IngestMeetingsAsync(scope.ServiceProvider, stoppingToken);
                 await IngestSessionDataAsync(scope.ServiceProvider, sessionKey, stoppingToken);
                 Log.Information("Successfully ingested session {SessionKey}", sessionKey);
             }
@@ -41,6 +43,20 @@ public class DataIngestionWorker : BackgroundService
             }
         }
     }
+
+    private async Task IngestMeetingsAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        Log.Information("Starting ingestion meeting list from OpenF1 API");
+        
+        var ingestMeetingsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestMeetingsCommand>>();
+        await ingestMeetingsHandler.HandleAsync(new IngestMeetingsCommand(), cancellationToken);
+
+    }
+    
+    // private async Task IngestSessionsAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    // {
+    //     Log.Information("Starting ingestion session list from OpenF1 API");
+    // }
 
     private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, int sessionKey, CancellationToken cancellationToken)
     {
@@ -65,16 +81,14 @@ public class DataIngestionWorker : BackgroundService
             var getDriversHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>>();
             var drivers = await getDriversHandler.HandleAsync(new GetSessionDriversQuery(session.Id), cancellationToken);
 
-            var addLapsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestLapsCommand>>();
+            var ingestLapsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestLapsCommand>>();
 
-            var ingestCarDataHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestCarDataCommand>>();
-            
-            //var driverIngestionTasks = new List<(int DriverNumber, Task Task)>();
-            
             foreach (var driver in drivers) // fix - old drivers
             {
-                await addLapsHandler.HandleAsync(new IngestLapsCommand(sessionKey, session.Id, driver.DriverNumber, driver.Id), cancellationToken);
+                await ingestLapsHandler.HandleAsync(new IngestLapsCommand(sessionKey, session.Id, driver.DriverNumber, driver.Id), cancellationToken);
             }
+            
+            var ingestCarDataHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestCarDataCommand>>();
 
             foreach (var driver in drivers)
             {
@@ -85,7 +99,7 @@ public class DataIngestionWorker : BackgroundService
 
                 try
                 {
-                    await IngestDriverDataSafelyAsync(ingestCarDataHandler, sessionKey, session.Id, driver, session.StartDate, cancellationToken);
+                    await ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(sessionKey, session.Id, driver.DriverNumber, driver.Id, session.StartDate), cancellationToken);
                     Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
                 }
                 catch (Exception ex)
@@ -100,20 +114,6 @@ public class DataIngestionWorker : BackgroundService
         {
             Log.Error(ex, "Error during session {SessionKey} ingestion", sessionKey);
             throw;
-        }
-    }
-
-    private async Task IngestDriverDataSafelyAsync(ICommandHandler<IngestCarDataCommand> handler,
-        int sessionKey, int sessionId, Driver driver, DateTime startDate, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await handler.HandleAsync(new IngestCarDataCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id, startDate), cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to ingest car data for driver {DriverNumber} in session {SessionKey}",
-                driver.DriverNumber, sessionKey);
         }
     }
 }

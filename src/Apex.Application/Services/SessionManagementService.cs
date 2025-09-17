@@ -32,24 +32,20 @@ public class SessionManagementService : ISessionManagementService
             return SessionCreationResult.AlreadyExists(existingSession);
         }
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var session = await CreateNewSessionAsync(sessionKey, cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            
+            var session = await CreateNewSessionsAsync(sessionKey, cancellationToken);
             Log.Information("Created session {SessionKey}", sessionKey);
             return SessionCreationResult.Created(session);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(cancellationToken);
             Log.Error(ex, "Failed to create session {SessionKey}", sessionKey);
             return SessionCreationResult.Failed(ex.Message);
         }
     }
 
-    private async Task<Session> CreateNewSessionAsync(int sessionKey, CancellationToken cancellationToken)
+    private async Task<Session> CreateNewSessionsAsync(int sessionKey, CancellationToken cancellationToken)
     {
         var sessionDto = await _apiClient.GetSessionAsync(sessionKey);
         if (sessionDto == null)
@@ -57,36 +53,17 @@ public class SessionManagementService : ISessionManagementService
             throw new SessionNotFoundInApiException(sessionKey);
         }
 
-        var meeting = await EnsureMeetingExistsAsync(sessionDto.Meeting_Key, cancellationToken);
+        var meetings = await _dbContext.Meetings.ToListAsync(cancellationToken);
         
         var session = sessionDto.ToEntity();
-        session.MeetingId = meeting.Id;
+        session.MeetingId = meetings
+            .Where(m => m.Key == sessionDto.Meeting_Key)
+            .Select(m => m.Id)
+            .FirstOrDefault();
         
-        _dbContext.Sessions.Add(session);
+        await _dbContext.Sessions.AddAsync(session, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return session;
-    }
-
-    private async Task<Meeting> EnsureMeetingExistsAsync(int meetingKey, CancellationToken cancellationToken)
-    {
-        var existingMeeting = await _dbContext.Meetings
-            .FirstOrDefaultAsync(m => m.Key == meetingKey, cancellationToken);
-
-        if (existingMeeting != null)
-            return existingMeeting;
-
-        var meetingDto = await _apiClient.GetMeetingAsync(meetingKey);
-        if (meetingDto == null)
-        {
-            throw new MeetingNotFoundInApiException(meetingKey);
-        }
-
-        var meeting = meetingDto.ToEntity();
-        _dbContext.Meetings.Add(meeting);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        Log.Information("Created meeting {MeetingKey}", meetingKey);
-        return meeting;
     }
 }
