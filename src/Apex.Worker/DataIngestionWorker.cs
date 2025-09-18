@@ -46,17 +46,27 @@ public class DataIngestionWorker : BackgroundService
 
     private async Task IngestMeetingsAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        Log.Information("Starting ingestion meeting list from OpenF1 API");
+        Log.Information("Starting meeting list ingestion from OpenF1 API");
         
         var ingestMeetingsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestMeetingsCommand>>();
         await ingestMeetingsHandler.HandleAsync(new IngestMeetingsCommand(), cancellationToken);
 
+        Log.Information("Completed meeting list ingestion from OpenF1 API");
     }
     
-    // private async Task IngestSessionsAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
-    // {
-    //     Log.Information("Starting ingestion session list from OpenF1 API");
-    // }
+    private async Task IngestSessionsAsync(IServiceProvider serviceProvider, List<int> meetingsKeys, CancellationToken cancellationToken)
+    {
+        Log.Information("Starting session list ingestion from OpenF1 API");
+        
+        var ingestSessionsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestSessionsCommand>>();
+
+        foreach (var meetingKey in meetingsKeys)
+        {
+            await ingestSessionsHandler.HandleAsync(new IngestSessionsCommand(meetingKey), cancellationToken);
+        }
+        
+        Log.Information("Completed session list ingestion from OpenF1 API");
+    }
 
     private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, int sessionKey, CancellationToken cancellationToken)
     {
@@ -64,9 +74,6 @@ public class DataIngestionWorker : BackgroundService
 
         try
         {
-            var createSessionHandler = serviceProvider.GetRequiredService<ICommandHandler<CreateSessionCommand>>();
-            await createSessionHandler.HandleAsync(new CreateSessionCommand(sessionKey), cancellationToken);
-
             var getSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionQuery, Session?>>();
             var session = await getSessionHandler.HandleAsync(new GetSessionQuery(sessionKey), cancellationToken);
             

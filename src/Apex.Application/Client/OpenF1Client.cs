@@ -33,11 +33,11 @@ public class OpenF1ApiClient : IOpenF1ApiClient
         return await FetchDataAsync<List<CarDataDto>>(url) ?? new List<CarDataDto>();
     }
 
-    public async Task<SessionDto?> GetSessionAsync(int sessionKey)
+    public async Task<List<SessionDto>?> GetSessionsAsync(int meetingKey)
     {
-        var url = $"sessions?session_key={sessionKey}";
+        var url = $"sessions?meeting_key={meetingKey}";
         var sessions = await FetchDataAsync<List<SessionDto>>(url);
-        return sessions?.SingleOrDefault();
+        return sessions;
     }
 
     public async Task<List<MeetingDto>?> GetMeetingsAsync()
