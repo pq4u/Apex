@@ -11,8 +11,8 @@ public class SessionRepository : ISessionRepository
 
     public SessionRepository(ApexDbContext dbContext) => _dbContext = dbContext;
 
-    public async Task<Session?> GetByKeyAsync(int sessionKey, CancellationToken cancellationToken = default)
-        => await _dbContext.Sessions.Include(s => s.Meeting).FirstOrDefaultAsync(s => s.Key == sessionKey, cancellationToken);
+    public async Task<List<Session>?> GetAllAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.Sessions.ToListAsync(cancellationToken);
 
     public async Task<Session> CreateAsync(Session session, CancellationToken cancellationToken = default)
     {

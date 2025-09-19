@@ -3,4 +3,4 @@ using Apex.Domain.Entities;
 
 namespace Apex.Application.Queries.Sessions;
 
-public record GetSessionQuery(int SessionKey) : IQuery<Session?>;
+public record GetSessionsQuery() : IQuery<List<Session>?>;

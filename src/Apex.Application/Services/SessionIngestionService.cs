@@ -1,9 +1,11 @@
 ﻿using Apex.Application.Client;
 using Apex.Application.DTO;
 using Apex.Application.Mappings;
+using Apex.Domain.Configuration;
 using Apex.Domain.Requests;
 using Apex.Infrastructure.DAL;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Apex.Application.Services;
@@ -12,11 +14,13 @@ public class SessionIngestionService : ISessionIngestionService
 {
     private readonly IOpenF1ApiClient _apiClient;
     private readonly ApexDbContext _dbContext;
+    private readonly IngestionOptions _options;
 
-    public SessionIngestionService(IOpenF1ApiClient apiClient, ApexDbContext dbContext)
+    public SessionIngestionService(IOpenF1ApiClient apiClient, ApexDbContext dbContext, IOptions<IngestionOptions> options)
     {
         _apiClient = apiClient;
         _dbContext = dbContext;
+        _options = options.Value;
     }
 
     public async Task<List<SessionDto>> IngestSessionsAsync(SessionIngestionRequest request, CancellationToken cancellationToken = default)
@@ -49,6 +53,7 @@ public class SessionIngestionService : ISessionIngestionService
         
         await _dbContext.SaveChangesAsync(cancellationToken);
         
+        await Task.Delay(_options.ApiDelayMs, cancellationToken);
         return addedSessions;
     }
 }
