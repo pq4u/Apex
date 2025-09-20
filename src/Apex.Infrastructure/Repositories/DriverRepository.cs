@@ -8,16 +8,22 @@ namespace Apex.Infrastructure.Repositories;
 public class DriverRepository : IDriverRepository
 {
     private readonly ApexDbContext _dbContext;
+    private readonly DbSet<Driver> _drivers;
 
     public DriverRepository(ApexDbContext dbContext)
     {
         _dbContext = dbContext;
+        _drivers = _dbContext.Drivers;
     }
 
-    public async Task<IEnumerable<Driver>> GetDriversBySessionIdAsync(int sessionId, CancellationToken cancellationToken = default)
-        => await _dbContext.SessionDrivers
-                .Where(sd => sd.SessionId == sessionId)
-                .Include(d => d.Team)
-                .Select(sd => sd.Driver)
-                .ToListAsync(cancellationToken);
+    public async Task<Driver?> GetByNumberAsync(int number)
+        => await _drivers.FirstOrDefaultAsync(x => x.DriverNumber == number);
+
+    public async Task<IEnumerable<Driver>?> GetAllAsync()
+        => await _drivers.ToListAsync();
+
+    public async Task AddAsync(Driver driver)
+    {
+        await _drivers.AddAsync(driver);
+    }
 }
