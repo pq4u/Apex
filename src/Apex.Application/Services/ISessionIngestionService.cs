@@ -5,6 +5,6 @@ namespace Apex.Application.Services;
 
 public interface ISessionIngestionService
 {
-    Task<List<SessionDto>> IngestSessionsAsync(SessionIngestionRequest request, CancellationToken cancellationToken = default);
+    Task<List<SessionDto>> IngestSessionsAsync(SessionIngestionRequest request);
 }
 

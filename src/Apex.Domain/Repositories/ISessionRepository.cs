@@ -6,4 +6,5 @@ public interface ISessionRepository
 {
     Task<IEnumerable<Session>?> GetAllAsync();
     Task AddAsync(Session session);
+    Task<bool> ExistsByKeyAsync(int key);
 }

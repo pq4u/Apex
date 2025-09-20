@@ -4,5 +4,5 @@ namespace Apex.Application.Services;
 
 public interface IMeetingIngestionService
 {
-    Task<bool> IngestMeetingsAsync(IngestMeetingsCommand request, CancellationToken cancellationToken = default);
+    Task<bool> IngestMeetingsAsync(IngestMeetingsCommand request);
 }

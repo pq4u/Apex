@@ -5,6 +5,6 @@ namespace Apex.Domain.Repositories;
 public interface ISessionDriverRepository
 {
     Task<IEnumerable<Driver>> GetDriversBySessionIdAsync(int sessionId);
-    Task AddSessionDriverAsync(SessionDriver sessionDriver);
-    Task<bool> SessionDriverExistsAsync(SessionDriver sessionDriver);
+    Task AddAsync(SessionDriver sessionDriver);
+    Task<bool> ExistsAsync(int sessionId, int driverId);
 }

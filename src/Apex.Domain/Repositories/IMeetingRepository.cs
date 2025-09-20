@@ -5,4 +5,5 @@ namespace Apex.Domain.Repositories;
 public interface IMeetingRepository
 {
     Task<IEnumerable<Meeting>?> GetAllAsync();
+    Task AddAsync(Meeting meeting);
 }

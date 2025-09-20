@@ -18,4 +18,9 @@ public class MeetingRepository : IMeetingRepository
 
     public async Task<IEnumerable<Meeting>?> GetAllAsync()
         => await _meetings.ToListAsync();
+
+    public async Task AddAsync(Meeting meeting)
+    {
+        await _meetings.AddAsync(meeting);
+    }
 }

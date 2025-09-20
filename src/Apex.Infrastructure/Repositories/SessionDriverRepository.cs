@@ -23,13 +23,13 @@ public class SessionDriverRepository : ISessionDriverRepository
                 .Select(sd => sd.Driver)
                 .ToListAsync();
 
-    public async Task AddSessionDriverAsync(SessionDriver sessionDriver)
+    public async Task AddAsync(SessionDriver sessionDriver)
     {
         await _sessionDrivers.AddAsync(sessionDriver);
     }
     
-    public async Task<bool> SessionDriverExistsAsync(SessionDriver sessionDriver)
+    public async Task<bool> ExistsAsync(int sessionId, int driverId)
         => await _dbContext.SessionDrivers
-            .AnyAsync(sd => sd.SessionId == sessionDriver.SessionId 
-                            && sd.DriverId == sessionDriver.DriverId);
+            .AnyAsync(sd => sd.SessionId == sessionId 
+                            && sd.DriverId == driverId);
 }

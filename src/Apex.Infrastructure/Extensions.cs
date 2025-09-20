@@ -25,8 +25,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITelemetryRepository, TelemetryRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ILapRepository, LapRepository>();
-        services.AddScoped<IDriverRepository, DriverRepository>();
+        services.AddScoped<ISessionDriverRepository, SessionDriverRepository>();
         services.AddScoped<IMeetingRepository, MeetingRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<IDriverRepository, DriverRepository>();
         
         return services;
     }

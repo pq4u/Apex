@@ -24,4 +24,6 @@ public class SessionRepository : ISessionRepository
         await _sessions.AddAsync(session);
     }
 
+    public async Task<bool> ExistsByKeyAsync(int key)
+        => await _sessions.AnyAsync(x => x.Key == key);
 }
