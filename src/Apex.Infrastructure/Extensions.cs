@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System.Data;
+using Apex.Application.Abstractions;
+using Apex.Infrastructure.DAL.Decorators;
 
 namespace Apex.Infrastructure;
 
@@ -55,7 +57,7 @@ public static class ServiceCollectionExtensions
                 options.LogTo(Console.WriteLine);
             }
         });
-
+        
         services.AddScoped<IDbConnection>(sp =>
         {
             var connection = new NpgsqlConnection(connectionString);
@@ -63,6 +65,8 @@ public static class ServiceCollectionExtensions
             return connection;
         });
 
+        services.AddScoped<IUnitOfWork, PostgresUnitOfWork>();
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(UnitOfWorkCommandHandlerDecorator<>));
 
         return services;
     }
