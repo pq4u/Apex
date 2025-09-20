@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Apex.Application\Apex.Application.csproj" />
     <ProjectReference Include="..\Apex.Domain\Apex.Domain.csproj" />
   </ItemGroup>
 
