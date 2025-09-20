@@ -13,10 +13,10 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
         _driverAssociationService = driverAssociationService;
     }
 
-    public async Task HandleAsync(IngestDriversCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(IngestDriversCommand command)
     {
         var result = await _driverAssociationService.AssociateDriversWithSessionAsync(
-            command.SessionKey, command.SessionId, cancellationToken);
+            command.SessionKey, command.SessionId);
 
         if (!result.IsSuccess)
         {

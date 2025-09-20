@@ -14,9 +14,9 @@ public class IngestMeetingsCommandHandler : ICommandHandler<IngestMeetingsComman
         _meetingIngestionService = meetingIngestionService;
     }
 
-    public async Task HandleAsync(IngestMeetingsCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(IngestMeetingsCommand command)
     {
-        var result = await _meetingIngestionService.IngestMeetingsAsync(command, cancellationToken);
+        var result = await _meetingIngestionService.IngestMeetingsAsync(command);
 
         if (!result)
         {

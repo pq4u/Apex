@@ -14,10 +14,10 @@ public class IngestLapsCommandHandler : ICommandHandler<IngestLapsCommand>
         _lapIngestionService = lapIngestionService;
     }
 
-    public async Task HandleAsync(IngestLapsCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(IngestLapsCommand command)
     {
         var request = new LapIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId);
-        var result = await _lapIngestionService.IngestLapsAsync(request, cancellationToken);
+        var result = await _lapIngestionService.IngestLapsAsync(request);
 
         if (!result.IsSuccess)
         {

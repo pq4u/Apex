@@ -8,7 +8,6 @@ using Apex.Application.Queries.Drivers;
 using Apex.Application.Queries.Meetings;
 using Apex.Application.Queries.Sessions;
 using Apex.Domain.Entities;
-using Apex.Domain.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -34,18 +33,18 @@ public class DataIngestionWorker : BackgroundService
         {
             try
             {
-                await IngestMeetingsAsync(scope.ServiceProvider, stoppingToken);
+                await IngestMeetingsAsync(scope.ServiceProvider);
                 
-                var meetings = await GetMeetingsAsync(scope.ServiceProvider, stoppingToken);
+                var meetings = await GetMeetingsAsync(scope.ServiceProvider);
                 var meetingKeys = meetings?.Select(x => x.Key).ToList();
 
                 
-                await IngestSessionsAsync(scope.ServiceProvider, meetingKeys, stoppingToken);
+                await IngestSessionsAsync(scope.ServiceProvider, meetingKeys);
 
-                var sessions = await GetSessionsAsync(scope.ServiceProvider, stoppingToken);
+                var sessions = await GetSessionsAsync(scope.ServiceProvider);
                 
                 
-                await IngestSessionDataAsync(scope.ServiceProvider, sessions, stoppingToken);
+                await IngestSessionDataAsync(scope.ServiceProvider, sessions);
                 
                 
                 //Log.Information("Successfully ingested session {SessionKey}", sessionKey);
@@ -57,17 +56,17 @@ public class DataIngestionWorker : BackgroundService
         }
     }
 
-    private async Task IngestMeetingsAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    private async Task IngestMeetingsAsync(IServiceProvider serviceProvider)
     {
         Log.Information("Starting meeting list ingestion from OpenF1 API");
         
         var ingestMeetingsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestMeetingsCommand>>();
-        await ingestMeetingsHandler.HandleAsync(new IngestMeetingsCommand(), cancellationToken);
+        await ingestMeetingsHandler.HandleAsync(new IngestMeetingsCommand());
 
         Log.Information("Completed meeting list ingestion from OpenF1 API");
     }
     
-    private async Task IngestSessionsAsync(IServiceProvider serviceProvider, List<int>? meetingsKeys, CancellationToken cancellationToken)
+    private async Task IngestSessionsAsync(IServiceProvider serviceProvider, List<int>? meetingsKeys)
     {
         Log.Information("Starting session list ingestion from OpenF1 API");
         
@@ -75,31 +74,29 @@ public class DataIngestionWorker : BackgroundService
 
         foreach (var meetingKey in meetingsKeys)
         {
-            await ingestSessionsHandler.HandleAsync(new IngestSessionsCommand(meetingKey), cancellationToken);
+            await ingestSessionsHandler.HandleAsync(new IngestSessionsCommand(meetingKey));
         }
         
         Log.Information("Completed session list ingestion from OpenF1 API");
     }
 
-    private async Task<List<Meeting>?> GetMeetingsAsync(IServiceProvider serviceProvider,
-        CancellationToken cancellationToken)
+    private async Task<IEnumerable<Meeting>?> GetMeetingsAsync(IServiceProvider serviceProvider)
     {
-        var getMeetingHandler = serviceProvider.GetRequiredService<IQueryHandler<GetMeetingsQuery, List<Meeting>?>>();
-        var meetings = await getMeetingHandler.HandleAsync(new GetMeetingsQuery(), cancellationToken);
+        var getMeetingHandler = serviceProvider.GetRequiredService<IQueryHandler<GetMeetingsQuery, IEnumerable<Meeting>?>>();
+        var meetings = await getMeetingHandler.HandleAsync(new GetMeetingsQuery());
 
         return meetings;
     }
     
-    private async Task<List<Session>?> GetSessionsAsync(IServiceProvider serviceProvider,
-        CancellationToken cancellationToken)
+    private async Task<IEnumerable<Session>?> GetSessionsAsync(IServiceProvider serviceProvider)
     {
-        var getSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionsQuery, List<Session>?>>();
-        var sessions = await getSessionHandler.HandleAsync(new GetSessionsQuery(), cancellationToken);
+        var getSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionsQuery, IEnumerable<Session>?>>();
+        var sessions = await getSessionHandler.HandleAsync(new GetSessionsQuery());
 
         return sessions;
     }
 
-    private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, List<Session> sessions, CancellationToken cancellationToken)
+    private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, IEnumerable<Session> sessions)
     {
         Log.Information("Starting data ingestion for {SessionKey}", sessions.Count());;
 
@@ -112,27 +109,24 @@ public class DataIngestionWorker : BackgroundService
 
             foreach (var session in sessions)
             {
-                await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Key, session.Id), cancellationToken);
+                await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Key, session.Id));
 
-                var drivers = await getDriversHandler.HandleAsync(new GetSessionDriversQuery(session.Id), cancellationToken);
+                var drivers = await getDriversHandler.HandleAsync(new GetSessionDriversQuery(session.Id));
 
 
                 foreach (var driver in drivers) // fix - old drivers
                 {
-                    await ingestLapsHandler.HandleAsync(new IngestLapsCommand(session.Key, session.Id, driver.DriverNumber, driver.Id), cancellationToken);
+                    await ingestLapsHandler.HandleAsync(new IngestLapsCommand(session.Key, session.Id, driver.DriverNumber, driver.Id));
                 }
                 
 
                 foreach (var driver in drivers)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        break;
-
                     Log.Information("Starting car data ingestion for driver {DriverNumber}", driver.DriverNumber);
 
                     try
                     {
-                        await ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(session.Key, session.Id, driver.DriverNumber, driver.Id, session.StartDate), cancellationToken);
+                        await ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(session.Key, session.Id, driver.DriverNumber, driver.Id, session.StartDate));
                         Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
                     }
                     catch (Exception ex)

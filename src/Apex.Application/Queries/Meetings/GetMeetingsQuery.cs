@@ -4,4 +4,4 @@ using Apex.Domain.Entities;
 
 namespace Apex.Application.Queries.Meetings;
 
-public record GetMeetingsQuery() : IQuery<List<Meeting>?>;
+public record GetMeetingsQuery() : IQuery<IEnumerable<Meeting>?>;

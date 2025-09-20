@@ -21,11 +21,11 @@ public class LapIngestionService : ILapIngestionService
         _options = options.Value;
     }
 
-    public async Task<LapIngestionResult> IngestLapsAsync(LapIngestionRequest request, CancellationToken cancellationToken = default)
+    public async Task<LapIngestionResult> IngestLapsAsync(LapIngestionRequest request)
     {
         try
         {
-            var existingDriverLaps = await _lapRepository.GetDriverLapsInSessionCountAsync(request.SessionKey, request.DriverId, cancellationToken);
+            var existingDriverLaps = await _lapRepository.GetDriverLapsInSessionCountAsync(request.SessionKey, request.DriverId);
 
             if (existingDriverLaps > 0)
             {
@@ -40,11 +40,11 @@ public class LapIngestionService : ILapIngestionService
             // if no laps......
             var entityLaps = laps.Select(l => l.ToEntity(request.SessionId, request.DriverId)).ToList();
 
-            await _lapRepository.AddDriverLapsAsync(entityLaps, cancellationToken);
+            await _lapRepository.AddDriverLapsAsync(entityLaps);
             Log.Information("Added {LapsCount} laps of driver {DriverNumber} in session key {SessionKey}",
                 entityLaps.Count(), request.DriverNumber, request.SessionKey);
             
-            await Task.Delay(_options.ApiDelayMs, cancellationToken);
+            await Task.Delay(_options.ApiDelayMs);
             
             return LapIngestionResult.Success(request.DriverNumber);
 

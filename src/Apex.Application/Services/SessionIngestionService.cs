@@ -31,11 +31,11 @@ public class SessionIngestionService : ISessionIngestionService
         
         foreach (var sessionDto in sessionsDtos)
         {
-            var exists = await _dbContext.Sessions.AnyAsync(x => x.Key == sessionDto.Meeting_Key, cancellationToken);
+            var exists = await _dbContext.Sessions.AnyAsync(x => x.Key == sessionDto.Session_Key, cancellationToken);
 
             if (exists)
             {
-                Log.Information("Session with key {SessionKey} already exists", sessionDto.Meeting_Key);
+                Log.Information("Session with key {SessionKey} already exists", sessionDto.Session_Key);
                 continue;
             }
             

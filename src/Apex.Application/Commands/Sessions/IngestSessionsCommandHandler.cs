@@ -12,10 +12,10 @@ public class IngestSessionsCommandHandler : ICommandHandler<IngestSessionsComman
     public IngestSessionsCommandHandler(ISessionIngestionService sessionIngestionService)
         => _sessionIngestionService = sessionIngestionService;
 
-    public async Task HandleAsync(IngestSessionsCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(IngestSessionsCommand command)
     {
         var request = new SessionIngestionRequest(command.MeetingKey);
-        var result = await _sessionIngestionService.IngestSessionsAsync(request, cancellationToken);
+        var result = await _sessionIngestionService.IngestSessionsAsync(request);
 
         if (!result.Any())
         {

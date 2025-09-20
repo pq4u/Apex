@@ -4,13 +4,13 @@ using Apex.Domain.Repositories;
 
 namespace Apex.Application.Queries.Sessions;
 
-public class GetSessionsQueryHandler : IQueryHandler<GetSessionsQuery, List<Session>?>
+public class GetSessionsQueryHandler : IQueryHandler<GetSessionsQuery, IEnumerable<Session>?>
 {
     private readonly ISessionRepository _sessionRepository;
 
     public GetSessionsQueryHandler(ISessionRepository sessionRepository)
         => _sessionRepository = sessionRepository;
 
-    public async Task<List<Session>?> HandleAsync(GetSessionsQuery query, CancellationToken cancellationToken = default)
-        => await _sessionRepository.GetAllAsync(cancellationToken);
+    public async Task<IEnumerable<Session>?> HandleAsync(GetSessionsQuery query)
+        => await _sessionRepository.GetAllAsync();
 }

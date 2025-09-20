@@ -6,11 +6,11 @@ namespace Apex.Application.Queries.Drivers;
 
 public class GetSessionDriversQueryHandler : IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>
 {
-    private readonly IDriverRepository _driverRepository;
+    private readonly ISessionDriverRepository _sessionDriverRepository;
 
-    public GetSessionDriversQueryHandler(IDriverRepository driverRepository)
-        => _driverRepository = driverRepository;
+    public GetSessionDriversQueryHandler(ISessionDriverRepository sessionDriverRepository)
+        => _sessionDriverRepository = sessionDriverRepository;
 
-    public async Task<IEnumerable<Driver>> HandleAsync(GetSessionDriversQuery query, CancellationToken cancellationToken = default)
-        => await _driverRepository.GetDriversBySessionIdAsync(query.SessionId, cancellationToken);
+    public async Task<IEnumerable<Driver>> HandleAsync(GetSessionDriversQuery query)
+        => await _sessionDriverRepository.GetDriversBySessionIdAsync(query.SessionId);
 }

@@ -11,6 +11,6 @@ public class GetCarDataQueryHandler : IQueryHandler<GetCarDataQuery, IEnumerable
     public GetCarDataQueryHandler(ITelemetryRepository telemetryRepository)
         => _telemetryRepository = telemetryRepository;
 
-    public async Task<IEnumerable<CarData>> HandleAsync(GetCarDataQuery query, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CarData>> HandleAsync(GetCarDataQuery query)
         => await _telemetryRepository.GetCarDataAsync(query.SessionId, query.DriverId, query.Start, query.End);
 }
