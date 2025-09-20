@@ -8,34 +8,20 @@ namespace Apex.Infrastructure.Repositories;
 public class SessionRepository : ISessionRepository
 {
     private readonly ApexDbContext _dbContext;
+    private readonly DbSet<Session> _sessions;
 
-    public SessionRepository(ApexDbContext dbContext) => _dbContext = dbContext;
-
-    public async Task<List<Session>?> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.Sessions.ToListAsync(cancellationToken);
-
-    public async Task<Session> CreateAsync(Session session, CancellationToken cancellationToken = default)
+    public SessionRepository(ApexDbContext dbContext)
     {
-        _dbContext.Sessions.Add(session);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return session;
+        _dbContext = dbContext;
+        _sessions = _dbContext.Sessions;
     }
 
-    public async Task<int> CreateSessionDriverAsync(int sessionId, int driverId, int teamId,
-        CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Session>?> GetAllAsync()
+        => await _sessions.ToListAsync();
+
+    public async Task AddAsync(Session session)
     {
-        var sessionDriver = new SessionDriver
-        {
-            SessionId = sessionId,
-            DriverId = driverId,
-            TeamId = teamId
-        };
-        
-        _dbContext.SessionDrivers.Add(sessionDriver);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return sessionDriver.DriverId;
+        await _sessions.AddAsync(session);
     }
 
-    public async Task<bool> SessionDriverExistsAsync(int sessionId, int driverId, CancellationToken cancellationToken = default)
-        => await _dbContext.SessionDrivers.AnyAsync(sd => sd.SessionId == sessionId && sd.DriverId == driverId, cancellationToken);
 }

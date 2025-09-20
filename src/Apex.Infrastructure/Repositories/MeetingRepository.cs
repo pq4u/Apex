@@ -8,10 +8,14 @@ namespace Apex.Infrastructure.Repositories;
 public class MeetingRepository : IMeetingRepository
 {
     private readonly ApexDbContext _dbContext;
+    private readonly DbSet<Meeting> _meetings;
 
     public MeetingRepository(ApexDbContext dbContext)
-        => _dbContext = dbContext;
+    {
+        _dbContext = dbContext;
+        _meetings = _dbContext.Meetings;
+    }
 
-    public async Task<List<Meeting>?> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.Meetings.ToListAsync(cancellationToken);
+    public async Task<IEnumerable<Meeting>?> GetAllAsync()
+        => await _meetings.ToListAsync();
 }
