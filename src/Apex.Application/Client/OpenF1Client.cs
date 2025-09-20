@@ -1,6 +1,5 @@
 ﻿using Apex.Application.Client;
 using Apex.Application.DTO;
-using Apex.Infrastructure;
 using Serilog;
 using System.Text.Json;
 

@@ -32,7 +32,7 @@ public static class Extensions
     {
         services.Configure<IngestionOptions>(options =>
         {
-            configuration.GetSection(IngestionOptions.SectionName).Bind(options);
+            configuration.GetSection(IngestionOptions.SectionName).Bind(options); // change!
         });
 
         services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();

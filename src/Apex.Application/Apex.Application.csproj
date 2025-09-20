@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageReference Include="Scrutor" Version="6.1.0" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Apex.Domain\Apex.Domain.csproj" />
-    <ProjectReference Include="..\Apex.Infrastructure\Apex.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
