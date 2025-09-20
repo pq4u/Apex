@@ -5,5 +5,5 @@ namespace Apex.Application.Services;
 
 public interface ILapIngestionService
 {
-    Task<LapIngestionResult> IngestLapsAsync(LapIngestionRequest request);
+    Task IngestLapsAsync(LapIngestionRequest request);
 }

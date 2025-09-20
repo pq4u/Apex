@@ -17,22 +17,8 @@ public class IngestLapsCommandHandler : ICommandHandler<IngestLapsCommand>
     public async Task HandleAsync(IngestLapsCommand command)
     {
         var request = new LapIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId);
-        var result = await _lapIngestionService.IngestLapsAsync(request);
-
-        if (!result.IsSuccess)
-        {
-            throw new InvalidOperationException($"Lap ingestion failed: {result.ErrorMessage}");
-        }
-
-        if (result.AlreadyExisted)
-        {
-            Log.Information("Laps of driver {DriverNumber} in session {SessionKey} already existed",
-                command.DriverNumber, command.SessionKey);
-        }
-        else
-        {
-            Log.Information("Successfully ingested lap of driver {DriverNumber} in session {SessionKey}", 
-                command.DriverNumber, command.SessionKey);
-        }
+        await _lapIngestionService.IngestLapsAsync(request);
+        Log.Information("Successfully ingested lap of driver {DriverNumber} in session {SessionKey}",
+            command.DriverNumber, command.SessionKey);
     }
 }

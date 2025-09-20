@@ -22,21 +22,18 @@ public class DriverAssociationService : IDriverAssociationService
         _apiClient = apiClient;
     }
 
-    public async Task<DriverAssociationResult> AssociateDriversWithSessionAsync(int sessionKey, int sessionId)
+    public async Task AssociateDriversWithSessionAsync(int sessionKey, int sessionId)
     {
         try
         {
             var driverMapping = await ProcessDriverAssociations(sessionKey, sessionId);
-            
-            Log.Information("Successfully associated {Count} drivers with session {SessionKey}", 
+
+            Log.Information("Successfully associated {Count} drivers with session {SessionKey}",
                 driverMapping.Count, sessionKey);
-            
-            return DriverAssociationResult.Success(driverMapping);
         }
         catch (Exception ex)
         {
-            // Log.Error(ex, "Failed to associate drivers with session {SessionKey}", sessionKey);
-            return DriverAssociationResult.Failed(ex.Message);
+            Log.Error(ex, "Failed to associate drivers with session {SessionKey}", sessionKey);
         }
     }
 
@@ -48,6 +45,8 @@ public class DriverAssociationService : IDriverAssociationService
         var driverNumberToId = new Dictionary<int, int>();
         var teamCache = new Dictionary<string, int>();
 
+        
+        
         foreach (var driverDto in driverDtos)
         {
             var team = await EnsureTeamExistsAsync(driverDto, teamCache);
