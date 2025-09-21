@@ -12,5 +12,5 @@ public class GetSessionsQueryHandler : IQueryHandler<GetSessionsQuery, IEnumerab
         => _sessionRepository = sessionRepository;
 
     public async Task<IEnumerable<Session>?> HandleAsync(GetSessionsQuery query)
-        => await _sessionRepository.GetAllAsync();
+        => await _sessionRepository.GetAllRacesAsync();
 }

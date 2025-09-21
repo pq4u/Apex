@@ -43,7 +43,6 @@ public class DataIngestionWorker : BackgroundService
 
                 var sessions = await GetSessionsAsync(scope.ServiceProvider);
                 
-                
                 await IngestSessionDataAsync(scope.ServiceProvider, sessions);
                 
                 
@@ -100,21 +99,24 @@ public class DataIngestionWorker : BackgroundService
     {
         Log.Information("Starting data ingestion for {SessionKey}", sessions.Count());;
 
+        var currentSessionKey = -1;
+        
         try
         {
             var ingestDriversHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestDriversCommand>>();
-            var getDriversHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>>();
+            var getDriversSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>>();
             var ingestLapsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestLapsCommand>>();
             var ingestCarDataHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestCarDataCommand>>();
 
             foreach (var session in sessions)
             {
-                await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Key, session.Id));
+                currentSessionKey = session.Key;
+                await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Id, session.Key));
 
-                var drivers = await getDriversHandler.HandleAsync(new GetSessionDriversQuery(session.Id));
+                var drivers = await getDriversSessionHandler.HandleAsync(new GetSessionDriversQuery(session.Id));
 
 
-                foreach (var driver in drivers) // fix - old drivers
+                foreach (var driver in drivers)
                 {
                     await ingestLapsHandler.HandleAsync(new IngestLapsCommand(session.Key, session.Id, driver.DriverNumber, driver.Id));
                 }
@@ -135,12 +137,12 @@ public class DataIngestionWorker : BackgroundService
                     }
                 }
 
-                Log.Information("Completed ingestion for session {SessionKey}", session.Key);
+                Log.Information("Completed data ingestion for session {SessionKey}", session.Key);
             }
         }
         catch (Exception ex)
         {
-            //Log.Error(ex, "Error during session {SessionKey} ingestion", session.Key);
+            Log.Error(ex, "Error during session {SessionKey} ingestion", currentSessionKey);
             throw;
         }
     }

@@ -18,6 +18,9 @@ public class SessionRepository : ISessionRepository
 
     public async Task<IEnumerable<Session>?> GetAllAsync()
         => await _sessions.ToListAsync();
+    
+    public async Task<IEnumerable<Session>?> GetAllRacesAsync()
+        => await _sessions.Where(x => x.Type == "Race").ToListAsync();
 
     public async Task AddAsync(Session session)
     {
