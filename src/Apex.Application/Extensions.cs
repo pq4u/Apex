@@ -23,11 +23,6 @@ public static class Extensions
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        services.Configure<IngestionOptions>(options =>
-        {
-            configuration.GetSection(IngestionOptions.SectionName).Bind(options); // change!
-        });
-
         services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
 
         return services;
