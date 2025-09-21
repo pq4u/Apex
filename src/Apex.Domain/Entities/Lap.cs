@@ -16,7 +16,7 @@ public class Lap
     public int? FinishLineSpeed { get; set; }
     public int? StSpeed { get; set; }
     public bool IsPitOutLap { get; set; }
-    public string SegmentsJson { get; set; }
+    public string? SegmentsJson { get; set; }
 
     public Session Session { get; set; }
     public Driver Driver { get; set; }
