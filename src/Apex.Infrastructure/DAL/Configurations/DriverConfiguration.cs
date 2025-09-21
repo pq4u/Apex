@@ -20,9 +20,11 @@ public class DriverConfiguration : IEntityTypeConfiguration<Driver>
             .HasMaxLength(50);
 
         builder.Property(e => e.FirstName)
+            .IsRequired(false)
             .HasMaxLength(50);
 
         builder.Property(e => e.LastName)
+            .IsRequired(false)
             .HasMaxLength(50);
 
         builder.Property(e => e.FullName)

@@ -4,5 +4,5 @@ namespace Apex.Application.Services;
 
 public interface IDriverAssociationService
 {
-    Task AssociateDriversWithSessionAsync(int sessionKey, int sessionId);
+    Task AssociateDriversWithSessionAsync(int sessionId, int sessionKey);
 }

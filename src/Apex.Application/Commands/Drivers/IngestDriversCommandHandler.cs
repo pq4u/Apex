@@ -15,7 +15,7 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
 
     public async Task HandleAsync(IngestDriversCommand command)
     {
-        await _driverAssociationService.AssociateDriversWithSessionAsync(command.SessionKey, command.SessionId);
+        await _driverAssociationService.AssociateDriversWithSessionAsync(command.SessionId, command.SessionKey);
         
         Log.Information("Successfully associated drivers with session {SessionKey}", command.SessionKey);
     }

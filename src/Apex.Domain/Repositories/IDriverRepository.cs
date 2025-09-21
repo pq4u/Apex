@@ -7,4 +7,5 @@ public interface IDriverRepository
     Task<Driver?> GetByNumberAsync(int number);
     Task<IEnumerable<Driver>?> GetAllAsync();
     Task AddAsync(Driver driver);
+    Task<bool> ExistsAsync(int driverNumber);
 }

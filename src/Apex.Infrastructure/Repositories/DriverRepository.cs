@@ -26,4 +26,7 @@ public class DriverRepository : IDriverRepository
     {
         await _drivers.AddAsync(driver);
     }
+    
+    public async Task<bool> ExistsAsync(int driverNumber)
+        => await _drivers.AnyAsync(x => x.DriverNumber == driverNumber);
 }

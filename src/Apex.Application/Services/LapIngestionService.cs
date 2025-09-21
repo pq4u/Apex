@@ -21,7 +21,7 @@ public class LapIngestionService : ILapIngestionService
         _options = options.Value;
     }
 
-    public async Task<LapIngestionResult> IngestLapsAsync(LapIngestionRequest request)
+    public async Task IngestLapsAsync(LapIngestionRequest request)
     {
         try
         {
@@ -31,7 +31,7 @@ public class LapIngestionService : ILapIngestionService
             {
                 Log.Information("Laps of driver {DriverNumber} in session key {SessionKey} are already added",
                     request.DriverNumber, request.SessionKey);
-                return LapIngestionResult.Success(request.DriverNumber);
+                return;
             }
 
 
@@ -43,16 +43,13 @@ public class LapIngestionService : ILapIngestionService
             await _lapRepository.AddDriverLapsAsync(entityLaps);
             Log.Information("Added {LapsCount} laps of driver {DriverNumber} in session key {SessionKey}",
                 entityLaps.Count(), request.DriverNumber, request.SessionKey);
-            
+        
             await Task.Delay(_options.ApiDelayMs);
             
-            return LapIngestionResult.Success(request.DriverNumber);
-
         }
         catch (Exception ex)
         {
             Log.Information(ex, "Failed adding laps of driver {DriverNumber} in session {SessionKey}", request.DriverNumber, request.SessionKey);
-            return LapIngestionResult.Failed(request.DriverNumber, ex.Message);
         }
     }
 }
