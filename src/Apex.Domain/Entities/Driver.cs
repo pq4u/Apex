@@ -5,8 +5,8 @@ public class Driver
     public int Id { get; set; }
     public int DriverNumber { get; set; }
     public string BroadcastName { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public string FullName { get; set; }
     public string NameAcronym { get; set; }
     public string? HeadshotUrl { get; set; }

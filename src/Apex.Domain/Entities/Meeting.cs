@@ -3,7 +3,7 @@
 public class Meeting
 {
     public int Id { get; set; }
-    public int Key { get; set; } // Store as string: "2024_1"
+    public int Key { get; set; }
     public string Name { get; set; }
     public string OfficialName { get; set; }
     public string Location { get; set; }
