@@ -23,23 +23,12 @@ public static class Extensions
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        services.AddApplicationServices(configuration);
-
-        return services;
-    }
-
-    private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
-    {
         services.Configure<IngestionOptions>(options =>
         {
             configuration.GetSection(IngestionOptions.SectionName).Bind(options); // change!
         });
 
         services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
-        services.AddScoped<ISessionIngestionService, SessionIngestionService>();
-        services.AddScoped<IDriverAssociationService, DriverAssociationService>();
-        services.AddScoped<ILapIngestionService, LapIngestionService>();
-        services.AddScoped<IMeetingIngestionService, MeetingIngestionService>();
 
         return services;
     }

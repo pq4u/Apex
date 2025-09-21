@@ -9,7 +9,6 @@ using Apex.Domain.States;
 using Apex.Domain.TimeSeries;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System.Globalization;
 
 namespace Apex.Application.Services;
 
@@ -71,6 +70,7 @@ public class TelemetryIngestionService : ITelemetryIngestionService
                 var processedSuccessfully = false;
                 try
                 {
+                    await Task.Delay(_options.ApiDelayMs, cancellationToken);
                     var carDataDtos = await _apiClient.GetCarDataBatchAsync(
                         request.SessionKey, request.DriverNumber, startDate, endDate);
 
@@ -110,8 +110,6 @@ public class TelemetryIngestionService : ITelemetryIngestionService
                     startDate = endDate;
                     endDate = startDate + interval;
                 }
-
-                await Task.Delay(_options.ApiDelayMs, cancellationToken);
             }
         }
         finally
@@ -157,7 +155,6 @@ public class TelemetryIngestionService : ITelemetryIngestionService
         Log.Information("Flushed {Count} telemetry records for driver {DriverNumber}", count, driverNumber);
         carDataBatch.Clear();
     }
-
 
     private static void LogAndRecordApiError(Exception ex, int driverNumber,
         DateTime startDate, DateTime endDate, TelemetryIngestionState state)
