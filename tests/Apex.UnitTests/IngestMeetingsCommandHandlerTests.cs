@@ -22,11 +22,11 @@ public class IngestMeetingsCommandHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WhenApiReturnsNull_ShouldThrowMeetingsNotFoundInApiException()
+    public async Task HandleAsync_WhenApiReturnsEmptyList_ShouldThrowMeetingsNotFoundInMeetingInApiException()
     {
         // arrange
         var command = new IngestMeetingsCommand();
-        _apiClient.GetMeetingsAsync().Returns((List<MeetingDto>?)null);
+        _apiClient.GetMeetingsAsync().Returns(new List<MeetingDto>());
 
         // act
         var exception = await Should.ThrowAsync<MeetingsNotFoundInApiException>(
