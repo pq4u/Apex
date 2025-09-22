@@ -16,7 +16,7 @@ public class SessionDriverRepository : ISessionDriverRepository
         _sessionDrivers = _dbContext.SessionDrivers;
     }
 
-    public async Task<IEnumerable<Driver>> GetDriversBySessionIdAsync(int sessionId)
+    public async Task<IEnumerable<Driver>?> GetDriversBySessionIdAsync(int sessionId)
         => await _sessionDrivers
                 .Where(sd => sd.SessionId == sessionId)
                 .Include(d => d.Team)

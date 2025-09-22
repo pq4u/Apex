@@ -16,13 +16,13 @@ public class OpenF1ApiClient : IOpenF1ApiClient
         _jsonOptions = OpenF1JsonOptions.Default;
     }
 
-    public async Task<List<DriverDto>> GetDriversAsync(int sessionKey)
+    public async Task<List<DriverDto>?> GetDriversAsync(int sessionKey)
     {
         var url = $"drivers?session_key={sessionKey}";
-        return await FetchDataAsync<List<DriverDto>>(url);
+        return await FetchDataAsync<List<DriverDto>>(url!);
     }
 
-    public async Task<List<CarDataDto>> GetCarDataBatchAsync(int sessionKey, int driverNumber, DateTime startDate, DateTime endDate)
+    public async Task<List<CarDataDto>?> GetCarDataBatchAsync(int sessionKey, int driverNumber, DateTime startDate, DateTime endDate)
     {
         var start = startDate.ToString("yyyy-MM-ddTHH:mm:ss.fff");
         var end = endDate.ToString("yyyy-MM-ddTHH:mm:ss.fff");

@@ -25,33 +25,28 @@ public class DataIngestionWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Log.Information("Data Ingestion Worker started");
-
-        // to do: refactor!
+        Log.Information("Data ingestion worker started");
+        using var scope = _serviceProvider.CreateScope();
         
-        using (var scope = _serviceProvider.CreateScope())
+        try
         {
-            try
-            {
-                await IngestMeetingsAsync(scope.ServiceProvider);
+            await IngestMeetingsAsync(scope.ServiceProvider);
                 
-                var meetings = await GetMeetingsAsync(scope.ServiceProvider);
-                var meetingKeys = meetings?.Select(x => x.Key).ToList();
+            var meetings = await GetMeetingsAsync(scope.ServiceProvider);
+            var meetingKeys = meetings?.Select(x => x.Key).ToList();
+                
+            await IngestSessionsAsync(scope.ServiceProvider, meetingKeys);
 
+            var sessions = await GetSessionsAsync(scope.ServiceProvider);
                 
-                await IngestSessionsAsync(scope.ServiceProvider, meetingKeys);
-
-                var sessions = await GetSessionsAsync(scope.ServiceProvider);
+            
+            await IngestSessionDataAsync(scope.ServiceProvider, sessions);
                 
-                await IngestSessionDataAsync(scope.ServiceProvider, sessions);
-                
-                
-                //Log.Information("Successfully ingested session {SessionKey}", sessionKey);
-            }
-            catch (Exception ex)
-            {
-                //Log.Error(ex, "Failed to ingest session {SessionKey}", sessionKey);
-            }
+            Log.Information("Data ingestion completed");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Data ingestion error: {ErrorMessage}", ex.Message);
         }
     }
 
@@ -71,6 +66,9 @@ public class DataIngestionWorker : BackgroundService
         
         var ingestSessionsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestSessionsCommand>>();
 
+        if (meetingsKeys is null)
+            return;
+        
         foreach (var meetingKey in meetingsKeys)
         {
             await ingestSessionsHandler.HandleAsync(new IngestSessionsCommand(meetingKey));
@@ -95,27 +93,32 @@ public class DataIngestionWorker : BackgroundService
         return sessions;
     }
 
-    private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, IEnumerable<Session> sessions)
+    private async Task IngestSessionDataAsync(IServiceProvider serviceProvider, IEnumerable<Session>? sessions)
     {
-        Log.Information("Starting data ingestion for {SessionKey}", sessions.Count());;
-
+        if (sessions is null)
+            return;
+        
         var currentSessionKey = -1;
         
         try
         {
             var ingestDriversHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestDriversCommand>>();
-            var getDriversSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>>>();
+            var getDriversSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>?>>();
             var ingestLapsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestLapsCommand>>();
             var ingestCarDataHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestCarDataCommand>>();
 
             foreach (var session in sessions)
             {
                 currentSessionKey = session.Key;
+                Log.Information("Starting data ingestion for {SessionKey}", currentSessionKey);
+
                 await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Id, session.Key));
 
                 var drivers = await getDriversSessionHandler.HandleAsync(new GetSessionDriversQuery(session.Id));
 
-
+                if (drivers is null)
+                    continue;
+                
                 foreach (var driver in drivers)
                 {
                     await ingestLapsHandler.HandleAsync(new IngestLapsCommand(session.Key, session.Id, driver.DriverNumber, driver.Id));
