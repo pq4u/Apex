@@ -2,10 +2,9 @@
 using Apex.Application.Client;
 using Apex.Application.DTO;
 using Apex.Application.Mappings;
-using Apex.Application.Services;
 using Apex.Domain.Configuration;
+using Apex.Domain.Exceptions;
 using Apex.Domain.Repositories;
-using Apex.Domain.Requests;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -30,6 +29,12 @@ public class IngestSessionsCommandHandler : ICommandHandler<IngestSessionsComman
     public async Task HandleAsync(IngestSessionsCommand command)
     {
         var sessionsDtos = await _apiClient.GetSessionsAsync(command.MeetingKey);
+
+        if (!sessionsDtos.Any())
+        {
+            throw new SessionsInMeetingNotFoundInApiException(command.MeetingKey);
+        }
+        
         var addedSessions = new List<SessionDto>();
         var meetings = await _meetingRepository.GetAllAsync();
         

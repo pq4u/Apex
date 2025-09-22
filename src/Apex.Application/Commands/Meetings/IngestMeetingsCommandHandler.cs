@@ -25,7 +25,7 @@ public class IngestMeetingsCommandHandler : ICommandHandler<IngestMeetingsComman
     {
         var meetings = await _apiClient.GetMeetingsAsync();
         
-        if (meetings == null)
+        if (!meetings.Any())
         {
             throw new MeetingsNotFoundInApiException();
         }
