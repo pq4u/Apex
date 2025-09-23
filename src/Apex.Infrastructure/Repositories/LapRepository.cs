@@ -16,13 +16,18 @@ internal class LapRepository : ILapRepository
         _laps = _dbContext.Laps;
     }
 
-    public async Task AddDriverLapsAsync(List<Lap> laps)
-    {
-        await _laps.AddRangeAsync(laps);
-    }
+    public async Task<IEnumerable<Lap>?> GetDriverLapsInSessionAsync(int sessionId, int driverId)
+        => await _laps
+            .Where(l => l.SessionId == sessionId && l.DriverId == driverId)
+            .ToListAsync();
 
     public async Task<int> GetDriverLapsInSessionCountAsync(int sessionId, int driverId)
         => await _laps
             .Where(l => l.SessionId == sessionId && l.DriverId == driverId)
             .CountAsync();
+
+    public async Task AddDriverLapsAsync(List<Lap> laps)
+    {
+        await _laps.AddRangeAsync(laps);
+    }
 }
