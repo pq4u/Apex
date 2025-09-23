@@ -21,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Logging.AddSerilog();
 
-builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddApplication(builder.Configuration, includeIngestionCommands: true);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWorkerServices(builder.Configuration);
 

@@ -9,21 +9,25 @@ namespace Apex.Application;
 
 public static class Extensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplication(this IServiceCollection services,
+        IConfiguration configuration, bool includeIngestionCommands = false)
     {
         var applicationAssembly = Assembly.GetExecutingAssembly();
-
-        services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
-
+        
         services.Scan(s => s.FromAssemblies(applicationAssembly)
             .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
+        if (includeIngestionCommands)
+        {
+            services.Scan(s => s.FromAssemblies(applicationAssembly)
+                .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+        
+            services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
+        }
 
         return services;
     }
