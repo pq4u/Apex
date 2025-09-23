@@ -61,7 +61,7 @@ public class TelemetryIngestionService : ITelemetryIngestionService
         var startDate = request.StartDate;
         var endDate = startDate + interval;
 
-        var carDataBatch = new List<CarData>();
+        var carDataBatch = new List<TelemetryData>();
 
         try
         {
@@ -130,7 +130,7 @@ public class TelemetryIngestionService : ITelemetryIngestionService
     }
 
     private void ProcessDataBatch(IEnumerable<CarDataDto> carDataDtos, TelemetryIngestionRequest request,
-        List<CarData> carDataBatch, TelemetryIngestionState state)
+        List<TelemetryData> carDataBatch, TelemetryIngestionState state)
     {
         var batchCount = 0;
         foreach (var dto in carDataDtos)
@@ -145,10 +145,10 @@ public class TelemetryIngestionService : ITelemetryIngestionService
     private bool ShouldStopIngestion(TelemetryIngestionState state)
         => state.ConsecutiveEmptyBatches >= _options.MaxEmptyBatches && state.HasData;
 
-    private bool ShouldFlushBatch(List<CarData> carDataBatch)
+    private bool ShouldFlushBatch(List<TelemetryData> carDataBatch)
         => carDataBatch.Count >= _options.BatchSize;
 
-    private async Task FlushBatch(List<CarData> carDataBatch, int driverNumber, CancellationToken cancellationToken)
+    private async Task FlushBatch(List<TelemetryData> carDataBatch, int driverNumber, CancellationToken cancellationToken)
     {
         var count = carDataBatch.Count;
         await _telemetryRepository.BulkInsertCarDataAsync(carDataBatch, cancellationToken);

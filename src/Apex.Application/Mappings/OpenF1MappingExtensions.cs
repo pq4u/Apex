@@ -67,7 +67,7 @@ public static class OpenF1MappingExtensions
         SegmentsJson = dto.Segments != null ? System.Text.Json.JsonSerializer.Serialize(dto.Segments) : null
     };
 
-    public static CarData ToTimeSeries(this CarDataDto dto, int sessionId, int driverId) => new CarData
+    public static TelemetryData ToTimeSeries(this CarDataDto dto, int sessionId, int driverId) => new TelemetryData
     {
         Time = dto.Date.ToUniversalTime(),
         SessionId = sessionId,

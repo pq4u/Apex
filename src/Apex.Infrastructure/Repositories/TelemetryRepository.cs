@@ -14,7 +14,7 @@ public class TelemetryRepository : ITelemetryRepository
     public TelemetryRepository(IConfiguration configuration)
         => _connectionString = configuration.GetConnectionString("ApexDb")!;
 
-    public async Task BulkInsertCarDataAsync(List<CarData> carDataList, CancellationToken cancellationToken)
+    public async Task BulkInsertCarDataAsync(List<TelemetryData> carDataList, CancellationToken cancellationToken)
     {
         if (!carDataList.Any()) return;
 
@@ -76,30 +76,23 @@ public class TelemetryRepository : ITelemetryRepository
         }
     }
 
-    public async Task<IEnumerable<CarData>> GetCarDataAsync(int sessionId, int driverId, DateTime? start = null, DateTime? end = null)
+    public async Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId)
     {
         try
         {
-            using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new NpgsqlConnection(_connectionString);
 
             var sql = @"
                     SELECT time, session_id, driver_id, speed, rpm, gear, throttle, brake, drs, n_gear
                     FROM telemetry.car_data
                     WHERE session_id = @SessionId AND driver_id = @DriverId";
 
-            if (start.HasValue)
-                sql += " AND time >= @Start";
-            if (end.HasValue)
-                sql += " AND time <= @End";
-
             sql += " ORDER BY time";
 
-            return await connection.QueryAsync<CarData>(sql, new
+            return await connection.QueryAsync<TelemetryData>(sql, new
             {
                 SessionId = sessionId,
-                DriverId = driverId,
-                Start = start,
-                End = end
+                DriverId = driverId
             });
         }
         catch (Exception ex)
