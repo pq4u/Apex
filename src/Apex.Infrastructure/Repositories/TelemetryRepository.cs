@@ -83,7 +83,7 @@ public class TelemetryRepository : ITelemetryRepository
             await using var connection = new NpgsqlConnection(_connectionString);
 
             var sql = @"
-                    SELECT time, session_id, driver_id, speed, rpm, gear, throttle, brake, drs, n_gear
+                    SELECT time, session_id as SessionId, driver_id as DriverId, speed, rpm, gear, throttle, brake, drs, n_gear as NGear
                     FROM telemetry.car_data
                     WHERE session_id = @SessionId AND driver_id = @DriverId";
 

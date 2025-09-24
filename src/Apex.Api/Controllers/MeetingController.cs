@@ -22,7 +22,7 @@ public class MeetingController : ControllerBase
     public async Task<ActionResult<IEnumerable<MeetingResultDto>>> Get()
     {
         var query = new GetMeetingsQuery();
-        var meetings = await _getMeetingsQueryHandler.HandleAsync(new GetMeetingsQuery());
+        var meetings = await _getMeetingsQueryHandler.HandleAsync(query);
 
         var response = meetings.Select(m => new MeetingResultDto
         {

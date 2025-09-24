@@ -18,9 +18,9 @@ public class LapController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LapResultDto>>> GetDriverLaps([FromQuery] GetDriverLapsInSessionQuery command)
+    public async Task<ActionResult<IEnumerable<LapResultDto>>> GetDriverLaps([FromQuery] GetDriverLapsInSessionQuery query)
     {
-        var laps = await _getDriverLapsInSessionQueryHandler.HandleAsync(command);
+        var laps = await _getDriverLapsInSessionQueryHandler.HandleAsync(query);
 
         var result = laps.Select(x => new LapResultDto
         {
