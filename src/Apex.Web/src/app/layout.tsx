@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${archivo.variable} ${archivo.variable}`}>
+      <body className={`p-2`}>
         {children}
       </body>
     </html>
