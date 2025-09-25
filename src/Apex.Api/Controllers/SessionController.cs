@@ -10,18 +10,17 @@ namespace Apex.Api.Controllers;
 [Route("sessions")]
 public class SessionController : ControllerBase
 {
-    private readonly IQueryHandler<GetSessionsQuery, IEnumerable<Session>> _getMeetingsQueryHandler;
+    private readonly IQueryHandler<GetSessionsInMeetingQuery, IEnumerable<Session>> _getSessionsInMeetingQueryHandler;
 
-    public SessionController(IQueryHandler<GetSessionsQuery, IEnumerable<Session>> getMeetingsQueryHandler)
+    public SessionController(IQueryHandler<GetSessionsInMeetingQuery, IEnumerable<Session>> getSessionsInMeetingQueryHandler)
     {
-        _getMeetingsQueryHandler = getMeetingsQueryHandler;
+        _getSessionsInMeetingQueryHandler = getSessionsInMeetingQueryHandler;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SessionResultDto>>> Get()
+    public async Task<ActionResult<IEnumerable<SessionResultDto>>> Get([FromQuery] GetSessionsInMeetingQuery query)
     {
-        var query = new GetSessionsQuery();
-        var sessions = await _getMeetingsQueryHandler.HandleAsync(query);
+        var sessions = await _getSessionsInMeetingQueryHandler.HandleAsync(query);
 
         var result = sessions.Select(x => new SessionResultDto
         {
