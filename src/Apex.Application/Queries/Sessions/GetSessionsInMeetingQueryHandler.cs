@@ -12,5 +12,5 @@ public class GetSessionsInMeetingQueryHandler : IQueryHandler<GetSessionsInMeeti
         => _sessionRepository = sessionRepository;
 
     public async Task<IEnumerable<Session>?> HandleAsync(GetSessionsInMeetingQuery query)
-        => await _sessionRepository.GetAllSessionsInMeetingAsync(query.meetingId);
+        => await _sessionRepository.GetAllSessionsInMeetingAsync(query.MeetingId);
 }

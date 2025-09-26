@@ -31,7 +31,7 @@ public class MeetingController : ControllerBase
             Location = m.Location,
             CountryName = m.CountryName,
             CircuitName = m.CircuitShortName,
-            DateStart = m.DateStart
+            StartDate = m.DateStart
         });
 
         return Ok(response);

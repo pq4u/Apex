@@ -27,6 +27,7 @@ public static class Extensions
                 .WithScopedLifetime());
         
             services.AddScoped<ITelemetryIngestionService, TelemetryIngestionService>();
+            services.AddScoped<ISessionDataOrchestrator, SessionDataOrchestrator>();
         }
 
         return services;

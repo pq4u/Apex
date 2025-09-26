@@ -23,28 +23,36 @@ public class IngestLapsCommandHandler : ICommandHandler<IngestLapsCommand>
 
     public async Task HandleAsync(IngestLapsCommand command)
     {
-        var existingDriverLaps = await _lapRepository.GetDriverLapsInSessionCountAsync(command.SessionKey, command.DriverId);
-
-        if (existingDriverLaps > 0)
+        try
         {
-            Log.Information("Laps of driver {DriverNumber} in session key {SessionKey} are already added",
-                command.DriverNumber, command.SessionKey);
-            return;
-        }
-        
-        var laps = await _apiClient.GetLapsAsync(command.SessionKey, command.DriverNumber);
+            var existingDriverLaps =
+                await _lapRepository.GetDriverLapsInSessionCountAsync(command.SessionKey, command.DriverId);
 
-        if (!laps.Any())
-        {        
-            throw new LapsNotFoundForDriverInSessionInApiException(command.DriverNumber, command.SessionKey);
-        }
-        
-        var entityLaps = laps.Select(l => l.ToEntity(command.SessionId, command.DriverId)).ToList();
+            if (existingDriverLaps > 0)
+            {
+                Log.Information("Laps of driver {DriverNumber} in session key {SessionKey} are already added",
+                    command.DriverNumber, command.SessionKey);
+                return;
+            }
 
-        await _lapRepository.AddDriverLapsAsync(entityLaps);
-        Log.Information("Added {LapsCount} laps of driver {DriverNumber} in session key {SessionKey}",
-            entityLaps.Count(), command.DriverNumber, command.SessionKey);
-        
-        await Task.Delay(_options.ApiDelayMs);
+            var laps = await _apiClient.GetLapsAsync(command.SessionKey, command.DriverNumber);
+
+            if (!laps.Any())
+            {
+                throw new LapsNotFoundForDriverInSessionInApiException(command.DriverNumber, command.SessionKey);
+            }
+
+            var entityLaps = laps.Select(l => l.ToEntity(command.SessionId, command.DriverId)).ToList();
+
+            await _lapRepository.AddDriverLapsAsync(entityLaps);
+            Log.Information("Added {LapsCount} laps of driver {DriverNumber} in session key {SessionKey}",
+                entityLaps.Count(), command.DriverNumber, command.SessionKey);
+
+            await Task.Delay(_options.ApiDelayMs);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Ingesting laps failed: {ErrorMessage}", ex.Message);
+        }
     }
 }

@@ -9,6 +9,7 @@ public class OpenF1ApiClient : IOpenF1ApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonOptions;
+    private const string DateFormat = "yyyy-MM-ddTHH:mm:ss.fff";
 
     public OpenF1ApiClient(HttpClient httpClient)
     {
@@ -24,8 +25,8 @@ public class OpenF1ApiClient : IOpenF1ApiClient
 
     public async Task<List<CarDataDto>?> GetCarDataBatchAsync(int sessionKey, int driverNumber, DateTime startDate, DateTime endDate)
     {
-        var start = startDate.ToString("yyyy-MM-ddTHH:mm:ss.fff");
-        var end = endDate.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+        var start = startDate.ToString(DateFormat);
+        var end = endDate.ToString(DateFormat);
         var url = $"car_data?session_key={sessionKey}&driver_number={driverNumber}&date>{start}&date<{end}";
 
         Log.Debug("Fetching car data: {Url}", url);
@@ -69,5 +70,4 @@ public class OpenF1ApiClient : IOpenF1ApiClient
             throw;
         }
     }
-
 }

@@ -28,38 +28,49 @@ public class IngestSessionsCommandHandler : ICommandHandler<IngestSessionsComman
 
     public async Task HandleAsync(IngestSessionsCommand command)
     {
-        var sessionsDtos = await _apiClient.GetSessionsAsync(command.MeetingKey);
+        Log.Information("Starting session list ingestion from OpenF1 API");
 
-        if (!sessionsDtos.Any())
+        try
         {
-            throw new SessionsInMeetingNotFoundInApiException(command.MeetingKey);
-        }
-        
-        var addedSessions = new List<SessionDto>();
-        var meetings = await _meetingRepository.GetAllAsync();
-        
-        foreach (var sessionDto in sessionsDtos)
-        {
-            var exists = await _sessionRepository.ExistsByKeyAsync(sessionDto.Session_Key);
+            var sessionsDtos = await _apiClient.GetSessionsAsync(command.MeetingKey);
 
-            if (exists)
+            if (!sessionsDtos.Any())
             {
-                Log.Information("Session with key {SessionKey} already exists", sessionDto.Session_Key);
-                continue;
+                throw new SessionsInMeetingNotFoundInApiException(command.MeetingKey);
             }
             
-            var session = sessionDto.ToEntity();
-
-            session.MeetingId = meetings
-                .Where(m => m.Key == sessionDto.Meeting_Key)
-                .Select(m => m.Id)
-                .FirstOrDefault();
+            var addedSessions = new List<SessionDto>();
+            var meetings = await _meetingRepository.GetAllAsync();
             
-            await _sessionRepository.AddAsync(session);
+            foreach (var sessionDto in sessionsDtos)
+            {
+                var exists = await _sessionRepository.ExistsByKeyAsync(sessionDto.Session_Key);
 
-            addedSessions.Add(sessionDto);
+                if (exists)
+                {
+                    Log.Information("Session with key {SessionKey} already exists", sessionDto.Session_Key);
+                    continue;
+                }
+                
+                var session = sessionDto.ToEntity();
+
+                session.MeetingId = meetings
+                    .Where(m => m.Key == sessionDto.Meeting_Key)
+                    .Select(m => m.Id)
+                    .FirstOrDefault();
+                
+                await _sessionRepository.AddAsync(session);
+
+                addedSessions.Add(sessionDto);
+            }
+            
+            Log.Information("Completed session list ingestion from OpenF1 API");
+            
+            await Task.Delay(_options.ApiDelayMs);
         }
-        
-        await Task.Delay(_options.ApiDelayMs);
+        catch (Exception ex)
+        {
+            Log.Error("Ingesting sessions failed: {ErrorMessage}", ex.Message);
+        }
     }
 }

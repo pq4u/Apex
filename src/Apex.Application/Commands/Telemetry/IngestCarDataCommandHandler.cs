@@ -16,16 +16,25 @@ public class IngestCarDataCommandHandler : ICommandHandler<IngestCarDataCommand>
 
     public async Task HandleAsync(IngestCarDataCommand command)
     {
-        var request = new TelemetryIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId, command.StartDate);
-
-        var result = await _ingestionService.IngestDriverTelemetryAsync(request);
-
-        if (!result.IsSuccess)
+        try
         {
-            throw new InvalidOperationException($"Telemetry ingestion failed: {result.ErrorMessage}");
-        }
+            var request = new TelemetryIngestionRequest(command.SessionKey, command.SessionId, command.DriverNumber, command.DriverId, command.StartDate);
 
-        Log.Information("Successfully completed telemetry ingestion for driver {DriverNumber}. Records processed: {Records}; Duration: {Duration}",
-            command.DriverNumber, result.TotalRecordsProcessed, result.ProcessingDuration);
+            var result = await _ingestionService.IngestDriverTelemetryAsync(request);
+
+            // to fix
+            
+            if (!result.IsSuccess)
+            {   
+                throw new InvalidOperationException($"Telemetry ingestion failed: {result.ErrorMessage}");  
+            }
+
+            Log.Information("Successfully completed telemetry ingestion for driver {DriverNumber}. Records processed: {Records}; Duration: {Duration}",
+                command.DriverNumber, result.TotalRecordsProcessed, result.ProcessingDuration);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Ingesting telemetry failed: {ErrorMessage}", ex.Message);
+        }
     }
 }

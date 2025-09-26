@@ -23,28 +23,38 @@ public class IngestMeetingsCommandHandler : ICommandHandler<IngestMeetingsComman
 
     public async Task HandleAsync(IngestMeetingsCommand command)
     {
-        var meetings = await _apiClient.GetMeetingsAsync();
-        
-        if (!meetings.Any())
-        {
-            throw new MeetingsNotFoundInApiException();
-        }
-        
-        var existingDbMeetings = await _meetingRepository.GetAllAsync();
+        Log.Information("Starting meeting list ingestion from OpenF1 API");
 
-        var meetingsEntities = meetings.Select(m => m.ToEntity()).ToList();
-
-        foreach (var meeting in meetingsEntities)
+        try 
         {
-            var meetingExists = existingDbMeetings.Any(m => m.Key == meeting.Key);
-            if (meetingExists)
+            var meetings = await _apiClient.GetMeetingsAsync();
+            
+            if (!meetings.Any())
             {
-                Log.Information("Meeting already exists in database {MeetingKey}", meeting.Key);
-                continue;
+                throw new MeetingsNotFoundInApiException();
             }
             
-            await _meetingRepository.AddAsync(meeting);
-            Log.Information("Created meeting {MeetingKey}", meeting.Key);
+            var existingDbMeetings = await _meetingRepository.GetAllAsync();
+
+            var meetingsEntities = meetings.Select(m => m.ToEntity()).ToList();
+
+            foreach (var meeting in meetingsEntities)
+            {
+                var meetingExists = existingDbMeetings.Any(m => m.Key == meeting.Key);
+                if (meetingExists)
+                {
+                    Log.Information("Meeting already exists in database {MeetingKey}", meeting.Key);
+                    continue;
+                }
+                
+                await _meetingRepository.AddAsync(meeting);
+            }
+
+            Log.Information("Completed meeting list ingestion from OpenF1 API");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Ingesting meetings failed: {ErrorMessage}", ex.Message);
         }
     }
 }

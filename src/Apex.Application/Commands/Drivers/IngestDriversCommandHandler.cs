@@ -1,7 +1,6 @@
 using Apex.Application.Abstractions;
 using Apex.Application.Client;
 using Apex.Application.Mappings;
-using Apex.Application.Services;
 using Apex.Domain.Configuration;
 using Apex.Domain.Entities;
 using Apex.Domain.Repositories;
@@ -12,17 +11,14 @@ namespace Apex.Application.Commands.Drivers;
 
 public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
 {
-    
-    private readonly ISessionDriverRepository _sessionDriverRepository;
     private readonly IDriverRepository _driverRepository;
     private readonly ITeamRepository _teamRepository;
     private readonly IOpenF1ApiClient _apiClient;
     private readonly IngestionOptions _options;
 
-    public IngestDriversCommandHandler(ISessionDriverRepository sessionDriverRepository, IDriverRepository driverRepository,
+    public IngestDriversCommandHandler(IDriverRepository driverRepository,
         ITeamRepository teamRepository, IOpenF1ApiClient apiClient, IOptions<IngestionOptions> options)
     {
-        _sessionDriverRepository = sessionDriverRepository;
         _driverRepository = driverRepository;
         _teamRepository = teamRepository;
         _apiClient = apiClient;
@@ -37,54 +33,41 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
             
             Log.Information("Found {Count} drivers for session {SessionKey}", driverDtos.Count, command.SessionKey);
 
-            var dbTeams = await _teamRepository.GetAllAsync();
-            var dbDrivers = await _driverRepository.GetAllAsync();
+            var dbTeams = (await _teamRepository.GetAllAsync())?.ToList();
+            var dbDrivers = (await _driverRepository.GetAllAsync())?.ToList();
 
             foreach (var driver in driverDtos)
             {
-                var driverExistsInDb = dbDrivers.Any(x => x.DriverNumber == driver.Driver_Number);
-                if (!driverExistsInDb)
+                // Add driver if not exists
+                var existingDriver = dbDrivers?.FirstOrDefault(x => x.DriverNumber == driver.Driver_Number);
+                if (existingDriver == null)
                 {
                     var newDriver = driver.ToEntity();
                     await _driverRepository.AddAsync(newDriver);
-                    Log.Information("Added driver {FullName} - {DriverNumber} to database}",
+                    Log.Information("Added driver {FullName} - {DriverNumber} to database",
                         newDriver.FullName, newDriver.DriverNumber);
-
-                    dbDrivers = await _driverRepository.GetAllAsync();
+                    dbDrivers?.Add(newDriver);
                 }
 
-                var teamExistsInDb = dbTeams.Any(x => x.Name == driver.Team_Name);
-
-                if (!teamExistsInDb)
+                // Add team if not exists
+                var existingTeam = dbTeams?.FirstOrDefault(x => x.Name == driver.Team_Name);
+                if (existingTeam == null)
                 {
                     var newTeam = driver.ExtractTeam();
                     await _teamRepository.AddAsync(newTeam);
                     Log.Information("Added team {TeamName} to database", newTeam.Name);
-
-                    dbTeams = await _teamRepository.GetAllAsync();
+                    dbTeams?.Add(newTeam);
                 }
-
-                var sessionDriver = new SessionDriver()
-                {
-                    DriverId = dbDrivers.First(x => x.DriverNumber == driver.Driver_Number).Id,
-                    TeamId = dbTeams.First(x => x.Name == driver.Team_Name).Id,
-                    SessionId = command.SessionId
-                };
-
-                var exists = await _sessionDriverRepository.ExistsAsync(command.SessionId, sessionDriver.DriverId);
-
-                if (exists) return;
-
-                await _sessionDriverRepository.AddAsync(sessionDriver);
             }
             
-            Log.Information("Successfully associated {Count} drivers with session {SessionKey}", command.SessionKey);
+            Log.Information("Successfully ingested {Count} drivers and teams for session {SessionKey}", driverDtos.Count, command.SessionKey);
             
             await Task.Delay(_options.ApiDelayMs);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to associate drivers with session {SessionKey}", command.SessionKey);
+            Log.Error(ex, "Failed to ingest drivers and teams for session {SessionKey}", command.SessionKey);
+            throw;
         }
     }
 }

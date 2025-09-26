@@ -7,5 +7,5 @@ public class MeetingResultDto
     public string Location { get; set; }
     public string CountryName { get; set; }
     public string CircuitName { get; set; }
-    public DateTime DateStart { get; set; }
+    public DateTime StartDate { get; set; }
 }

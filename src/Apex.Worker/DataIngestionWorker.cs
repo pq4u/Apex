@@ -6,7 +6,9 @@ using Apex.Application.Commands.Sessions;
 using Apex.Application.Commands.Telemetry;
 using Apex.Application.Queries.Drivers;
 using Apex.Application.Queries.Meetings;
+using Apex.Application.Queries.Races;
 using Apex.Application.Queries.Sessions;
+using Apex.Application.Services;
 using Apex.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,7 +40,6 @@ public class DataIngestionWorker : BackgroundService
             await IngestSessionsAsync(scope.ServiceProvider, meetingKeys);
 
             var sessions = await GetSessionsAsync(scope.ServiceProvider);
-                
             
             await IngestSessionDataAsync(scope.ServiceProvider, sessions);
                 
@@ -52,18 +53,12 @@ public class DataIngestionWorker : BackgroundService
 
     private async Task IngestMeetingsAsync(IServiceProvider serviceProvider)
     {
-        Log.Information("Starting meeting list ingestion from OpenF1 API");
-        
         var ingestMeetingsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestMeetingsCommand>>();
         await ingestMeetingsHandler.HandleAsync(new IngestMeetingsCommand());
-
-        Log.Information("Completed meeting list ingestion from OpenF1 API");
     }
     
     private async Task IngestSessionsAsync(IServiceProvider serviceProvider, List<int>? meetingsKeys)
     {
-        Log.Information("Starting session list ingestion from OpenF1 API");
-        
         var ingestSessionsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestSessionsCommand>>();
 
         if (meetingsKeys is null)
@@ -73,8 +68,6 @@ public class DataIngestionWorker : BackgroundService
         {
             await ingestSessionsHandler.HandleAsync(new IngestSessionsCommand(meetingKey));
         }
-        
-        Log.Information("Completed session list ingestion from OpenF1 API");
     }
 
     private async Task<IEnumerable<Meeting>?> GetMeetingsAsync(IServiceProvider serviceProvider)
@@ -87,8 +80,8 @@ public class DataIngestionWorker : BackgroundService
     
     private async Task<IEnumerable<Session>?> GetSessionsAsync(IServiceProvider serviceProvider)
     {
-        var getSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionsQuery, IEnumerable<Session>?>>();
-        var sessions = await getSessionHandler.HandleAsync(new GetSessionsQuery());
+        var getSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetAllRacesQuery, IEnumerable<Session>?>>();
+        var sessions = await getSessionHandler.HandleAsync(new GetAllRacesQuery());
 
         return sessions;
     }
@@ -102,45 +95,12 @@ public class DataIngestionWorker : BackgroundService
         
         try
         {
-            var ingestDriversHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestDriversCommand>>();
-            var getDriversSessionHandler = serviceProvider.GetRequiredService<IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>?>>();
-            var ingestLapsHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestLapsCommand>>();
-            var ingestCarDataHandler = serviceProvider.GetRequiredService<ICommandHandler<IngestCarDataCommand>>();
-
+            var sessionDataOrchestrator = serviceProvider.GetRequiredService<ISessionDataOrchestrator>();
+            
             foreach (var session in sessions)
             {
                 currentSessionKey = session.Key;
-                Log.Information("Starting data ingestion for {SessionKey}", currentSessionKey);
-
-                await ingestDriversHandler.HandleAsync(new IngestDriversCommand(session.Id, session.Key));
-
-                var drivers = await getDriversSessionHandler.HandleAsync(new GetSessionDriversQuery(session.Id));
-
-                if (drivers is null)
-                    continue;
-                
-                foreach (var driver in drivers)
-                {
-                    await ingestLapsHandler.HandleAsync(new IngestLapsCommand(session.Key, session.Id, driver.DriverNumber, driver.Id));
-                }
-                
-
-                foreach (var driver in drivers)
-                {
-                    Log.Information("Starting car data ingestion for driver {DriverNumber}", driver.DriverNumber);
-
-                    try
-                    {
-                        await ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(session.Key, session.Id, driver.DriverNumber, driver.Id, session.StartDate));
-                        Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning("Failed to ingest car data for driver {DriverNumber}: {Error}", driver.DriverNumber, ex.Message);
-                    }
-                }
-
-                Log.Information("Completed data ingestion for session {SessionKey}", session.Key);
+                await sessionDataOrchestrator.IngestSessionDataAsync(session.Id, session.Key, session.StartDate);
             }
         }
         catch (Exception ex)
