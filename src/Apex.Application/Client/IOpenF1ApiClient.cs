@@ -9,4 +9,5 @@ public interface IOpenF1ApiClient
     Task<List<SessionDto>?> GetSessionsAsync(int meetingKey);
     Task<List<MeetingDto>?> GetMeetingsAsync();
     Task<List<LapDto>?> GetLapsAsync(int meetingKey, int driverNumber);
+    Task<List<StintDto>?> GetStintsAsync(int sessionKey);
 }

@@ -42,6 +42,17 @@ public static class OpenF1MappingExtensions
         HeadshotUrl = dto.Headshot_Url,
         CountryCode = dto.Country_Code
     };
+    
+    public static Stint ToEntity(this StintDto dto, int sessionId, int driverId) => new Stint
+    {
+        SessionId = sessionId,
+        DriverId = driverId,
+        Compound = dto.Compound,
+        StintNumber = dto.Stint_Number,
+        TyreAgeAtStart = dto.Tyre_Age_At_Start,
+        LapStart = dto.Lap_Start ?? 0,
+        LapEnd = dto.Lap_End ?? 0,
+    };
 
     public static Team ExtractTeam(this DriverDto dto) => new Team
     {

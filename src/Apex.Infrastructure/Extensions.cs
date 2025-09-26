@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMeetingRepository, MeetingRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<IDriverRepository, DriverRepository>();
+        services.AddScoped<IStintRepository, StintRepository>();
         
         return services;
     }

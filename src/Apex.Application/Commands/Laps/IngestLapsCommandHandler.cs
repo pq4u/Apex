@@ -26,7 +26,7 @@ public class IngestLapsCommandHandler : ICommandHandler<IngestLapsCommand>
         try
         {
             var existingDriverLaps =
-                await _lapRepository.GetDriverLapsInSessionCountAsync(command.SessionKey, command.DriverId);
+                await _lapRepository.GetDriverLapsInSessionCountAsync(command.SessionId, command.DriverId);
 
             if (existingDriverLaps > 0)
             {

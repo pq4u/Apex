@@ -54,6 +54,13 @@ public class OpenF1ApiClient : IOpenF1ApiClient
         return laps;
     }
 
+    public async Task<List<StintDto>?> GetStintsAsync(int sessionKey)
+    {
+        var url = $"stints?session_key={sessionKey}";
+        var stints = await FetchDataAsync<List<StintDto>>(url);
+        return stints;
+    }
+
     private async Task<T?> FetchDataAsync<T>(string endpoint)
     {
         try
