@@ -6,10 +6,12 @@ export default function Stats() {
   const [meetings, setMeetings] = useState([])
   const [sessions, setSessions] = useState([])
   const [drivers, setDrivers] = useState([])
-  const [allDriverLaps, setAllDriverLaps] = useState({}) 
+  const [allDriverLaps, setAllDriverLaps] = useState({})
+  const [allDriverStints, setAllDriverStints] = useState({})
   const [selectedMeeting, setSelectedMeeting] = useState('')
   const [selectedSession, setSelectedSession] = useState('')
   const [selectedDrivers, setSelectedDrivers] = useState([])
+  const [showTable, setShowTable] = useState(false)
   
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
@@ -72,14 +74,46 @@ export default function Stats() {
       setAllDriverLaps({})
     }
   }, [selectedDrivers, selectedSession])
+
+  useEffect(() => {
+    if (selectedDrivers.length > 0) {
+      const fetchStintsPromises = selectedDrivers.map(driverId =>
+        fetch(`http://localhost:5001/stints?sessionId=${selectedSession}&driverId=${driverId}`)
+          .then(res => res.json())
+          .then(stints => ({ driverId, stints }))
+      )
+
+      Promise.all(fetchStintsPromises)
+        .then(results => {
+          const stintsByDriver = {}
+          results.forEach(({ driverId, stints }) => {
+            stintsByDriver[driverId] = stints
+          })
+          setAllDriverStints(stintsByDriver)
+        })
+        .catch(console.error)
+    } else {
+      setAllDriverStints({})
+    }
+  }, [selectedDrivers, selectedSession])
   
+  const getTyreInfoForLap = (driverId: number, lapNumber: number) => {
+    const driverStints = allDriverStints[driverId] || []
+    const stint = driverStints.find(s => lapNumber >= s.startLap && lapNumber <= s.endLap)
+    return stint ? {
+      compound: stint.compound,
+      stintNumber: stint.stintNumber,
+      tyreAge: stint.startTyreAge + (lapNumber - stint.startLap)
+    } : null
+  }
+
   useEffect(() => {
     if (Object.keys(allDriverLaps).length > 0 && chartRef.current){
       if (chartInstanceRef.current){
         chartInstanceRef.current.destroy()
       }
 
-      const colors = [
+      const colors = [ // fix - get teams colours
         'rgba(93, 1, 146, 1)',
         'rgba(255, 99, 132, 1)',
         'rgba(54, 162, 235, 1)',
@@ -95,7 +129,7 @@ export default function Stats() {
       Object.entries(allDriverLaps).forEach(([driverId, laps], index) => {
         var filteredLaps = laps.filter(x => x.lapDurationMs > 1)
 
-        // Remove anomalies (outliers) using IQR method
+        // IQR method
         if (filteredLaps.length > 4) {
           const sortedTimes = filteredLaps.map(x => x.lapDurationMs).sort((a, b) => a - b)
           const q1Index = Math.floor(sortedTimes.length * 0.25)
@@ -112,10 +146,9 @@ export default function Stats() {
         filteredLaps.forEach(lap => allLapNumbers.add(lap.lapNumber))
 
         const driver = drivers.find(d => d.id === parseInt(driverId))
-        const driverName = driver ? `${driver.firstName} ${driver.lastName}` : `Driver ${driverId}`
 
         datasets.push({
-          label: driverName,
+          label: driver.nameAcronym,
           data: filteredLaps.map(lap => ({x: lap.lapNumber, y: lap.lapDurationMs})),
           borderColor: colors[index % colors.length],
           backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
@@ -135,6 +168,31 @@ export default function Stats() {
         },
         options: {
           responsive: true,
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                afterLabel: function(context: any) {
+                  const lapNumber = context.parsed.x
+                  const datasetIndex = context.datasetIndex
+                  const driverId = selectedDrivers[datasetIndex]
+                  const tyreInfo = getTyreInfoForLap(driverId, lapNumber)
+
+                  if (tyreInfo) {
+                    return [
+                      `Tyre: ${tyreInfo.compound}`,
+                      `Stint: ${tyreInfo.stintNumber}`,
+                      `Tyre Age: ${tyreInfo.tyreAge} laps`
+                    ]
+                  }
+                  return []
+                }
+              }
+            }
+          },
           scales: {
             y: {
               beginAtZero: false,
@@ -162,7 +220,7 @@ export default function Stats() {
         chartInstanceRef.current.destroy()
       }
     }
-  }, [allDriverLaps, drivers])
+  }, [allDriverLaps, allDriverStints, drivers, selectedDrivers])
 
   return (
       <div>
@@ -198,24 +256,38 @@ export default function Stats() {
         {selectedSession && (
           <>
             Select drivers:
-            <div className="border border-slate-200 rounded p-3 bg-white">
-              {drivers.map((driver) => (
-                <label key={driver.id} className="flex items-center space-x-2 mb-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedDrivers.includes(driver.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedDrivers([...selectedDrivers, driver.id])
-                      } else {
-                        setSelectedDrivers(selectedDrivers.filter(id => id !== driver.id))
-                      }
-                    }}
-                    className="rounded"
-                  />
-                  <span className="text-sm text-slate-700">{driver.firstName} {driver.lastName}</span>
-                </label>
-              ))}
+            <div className="border border-slate-200 rounded p-4 bg-white">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {drivers.map((driver) => (
+                  <label key={driver.id} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer border border-transparent hover:border-gray-200 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedDrivers.includes(driver.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDrivers([...selectedDrivers, driver.id])
+                        } else {
+                          setSelectedDrivers(selectedDrivers.filter(id => id !== driver.id))
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <div className="flex items-center space-x-2 min-w-0">
+                      {driver.headshotUrl && (
+                        <img
+                          src={driver.headshotUrl}
+                          alt={driver.nameAcronym}
+                          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-slate-700">{driver.nameAcronym}</div>
+                        <div className="text-xs text-slate-500 truncate">{driver.firstName} {driver.lastName}</div>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
           </>
           )}
@@ -225,29 +297,82 @@ export default function Stats() {
             <div className="mt-6 mb-6">
               <canvas ref={chartRef} width="800" height="400"></canvas>
             </div>
-            
-            <table className="w-full text-left table-auto min-w-max">
-              <thead>
-                <tr>
-                  <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Driver</th>
-                  <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Lap number</th>
-                  <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Lap time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(allDriverLaps).flatMap(([driverId, laps]) => {
-                  const driver = drivers.find(d => d.id === parseInt(driverId))
-                  const driverName = driver ? `${driver.firstName} ${driver.lastName}` : `Driver ${driverId}`
-                  return laps.map((lap) => (
-                    <tr key={`${driverId}-${lap.lapNumber}`}>
-                      <td className="p-4 border-b border-blue-gray-50">{driverName}</td>
-                      <td className="p-4 border-b border-blue-gray-50">{lap.lapNumber}</td>
-                      <td className="p-4 border-b border-blue-gray-50">{millisecondsToMinuteFormat(lap.lapDurationMs)}</td>
-                    </tr>
-                  ))
-                })}
-              </tbody>
-            </table>
+
+            <button
+              onClick={() => setShowTable(!showTable)}
+              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              {showTable ? 'Hide lap times table' : 'Show lap times table'}
+            </button>
+
+            {showTable && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left table-auto">
+                <thead>
+                  <tr>
+                    <th className="p-2 md:p-4 border-b border-blue-gray-100 bg-blue-gray-50 sticky left-0 bg-blue-gray-50 min-w-[60px]">Lap</th>
+                    {selectedDrivers.map(driverId => {
+                      const driver = drivers.find(d => d.id === parseInt(driverId))
+                      return (
+                        <th key={driverId} className="p-2 md:p-4 border-b border-blue-gray-100 bg-blue-gray-50 min-w-[100px] text-center">
+                          <div className="flex flex-col items-center space-y-1">
+                            {driver?.headshotUrl && (
+                              <img
+                                src={driver.headshotUrl}
+                                alt={driver.nameAcronym}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            )}
+                            <span className="text-xs font-medium">{driver.nameAcronym}</span>
+                          </div>
+                        </th>
+                      )
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                      
+                    const allLapNumbers = new Set()
+                    Object.values(allDriverLaps).forEach(laps => {
+                      laps.forEach(lap => allLapNumbers.add(lap.lapNumber))
+                    })
+                    const sortedLapNumbers = Array.from(allLapNumbers).sort((a, b) => a - b)
+
+                    return sortedLapNumbers.map(lapNumber => (
+                      <tr key={lapNumber}>
+                        <td className="p-2 md:p-4 border-b border-blue-gray-50 font-medium sticky left-0 bg-white min-w-[60px]">{lapNumber}</td>
+                        {selectedDrivers.map(driverId => {
+                          const driverLaps = allDriverLaps[driverId] || []
+                          const lap = driverLaps.find(l => l.lapNumber === lapNumber)
+                          const tyreInfo = getTyreInfoForLap(driverId, lapNumber)
+
+                          return (
+                            <td key={`${lapNumber}-${driverId}`} className="p-2 md:p-4 border-b border-blue-gray-50 text-center text-sm">
+                              {lap ? (
+                                <div className="flex flex-col items-center space-y-1">
+                                  <span className="font-medium">{millisecondsToMinuteFormat(lap.lapDurationMs)}</span>
+                                  {tyreInfo && (
+                                    <div className="text-xs text-gray-600 flex items-center space-x-1">
+                                      <span className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                                        {tyreInfo.compound}
+                                      </span>
+                                      <span>S{tyreInfo.stintNumber}</span>
+                                      <span>{tyreInfo.tyreAge}L</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : '-'}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))
+                  })()}
+                </tbody>
+              </table>
+            </div>
+            )}
           </>
         )}
       </div>
