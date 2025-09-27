@@ -1,6 +1,147 @@
 'use client'
 import * as Chart from 'chart.js'
+import 'chartjs-adapter-date-fns'
 import { useState, useEffect, useRef } from 'react'
+
+function TelemetryChart({ lapNumber, telemetryData, selectedDrivers, drivers }) {
+  const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
+
+  useEffect(() => {
+    if (chartRef.current && telemetryData) {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy()
+      }
+
+      console.log('chart telemetry data:', telemetryData)
+
+      const colors = [
+        'rgba(93, 1, 146, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+      ]
+
+      const datasets = []
+      let allTimestamps = []
+
+      selectedDrivers.forEach((driverId, index) => {
+        const driverData = telemetryData[driverId] || []
+        const driver = drivers.find(d => d.id === parseInt(driverId))
+
+        console.log(`Driver ${driverId} data:`, driverData)
+
+        if (driverData.length > 0) {
+          const chartData = driverData
+            .filter(point => point.speed !== null && point.speed !== undefined)
+            .map(point => {
+              const timestamp = new Date(point.time)
+              allTimestamps.push(timestamp)
+              return {
+                x: timestamp,
+                y: point.speed
+              }
+            })
+
+          console.log(`Driver ${driverId} chart data:`, chartData)
+
+          if (chartData.length > 0) {
+            datasets.push({
+              label: driver?.nameAcronym || `Driver ${driverId}`,
+              data: chartData,
+              borderColor: colors[index % colors.length],
+              backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
+              tension: 0.1,
+              fill: false,
+              pointRadius: 1,
+              borderWidth: 2
+            })
+          }
+        }
+      })
+
+      if (datasets.length > 0 && allTimestamps.length > 0) {
+        const minTime = new Date(Math.min(...allTimestamps))
+        const maxTime = new Date(Math.max(...allTimestamps))
+
+        const context = chartRef.current.getContext('2d')
+        chartInstanceRef.current = new Chart.Chart(context, {
+          type: 'line',
+          data: {
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Speed - Lap ${lapNumber}`
+              },
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            },
+            scales: {
+              x: {
+                type: 'time',
+                min: minTime,
+                max: maxTime,
+                time: {
+                  displayFormats: {
+                    millisecond: 'HH:mm:ss.SSS',
+                    second: 'HH:mm:ss',
+                    minute: 'HH:mm'
+                  }
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Speed (km/h)'
+                }
+              }
+            }
+          }
+        })
+      } else {
+        console.log('No valid data for chart')
+      }
+    }
+
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy()
+      }
+    }
+  }, [telemetryData, selectedDrivers, drivers, lapNumber])
+
+  return (
+    <div className="w-full">
+      <div style={{ height: '400px' }}>
+        <canvas ref={chartRef}></canvas>
+      </div>
+      {(!telemetryData || Object.keys(telemetryData).length === 0) && (
+        <div className="text-center text-gray-500 py-8">
+          Loading telemetry data...
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Stats() {
   const [meetings, setMeetings] = useState([])
@@ -12,6 +153,8 @@ export default function Stats() {
   const [selectedSession, setSelectedSession] = useState('')
   const [selectedDrivers, setSelectedDrivers] = useState([])
   const [showTable, setShowTable] = useState(false)
+  const [expandedRows, setExpandedRows] = useState(new Set())
+  const [telemetryData, setTelemetryData] = useState({})
   
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
@@ -109,7 +252,18 @@ export default function Stats() {
   }
 
   const handleShowTelemetry = (lapNumber: number) => {
-    selectedDrivers.forEach(driverId => {
+    const newExpandedRows = new Set(expandedRows)
+
+    if (expandedRows.has(lapNumber)) {
+      newExpandedRows.delete(lapNumber)
+      setExpandedRows(newExpandedRows)
+      return
+    }
+
+    newExpandedRows.add(lapNumber)
+    setExpandedRows(newExpandedRows)
+
+    const fetchPromises = selectedDrivers.map(driverId => {
       const driverLaps = allDriverLaps[driverId] || []
       const currentLap = driverLaps.find(l => l.lapNumber === lapNumber)
 
@@ -130,14 +284,29 @@ export default function Stats() {
 
         const telemetryUrl = `http://localhost:5001/telemetry?sessionId=${selectedSession}&driverId=${driverId}&dateFrom=${dateFrom}&dateTo=${dateTo}`
 
-        fetch(telemetryUrl)
+        return fetch(telemetryUrl)
           .then(res => res.json())
-          .then(data => {
-            console.log(`telemetry data: driver id ${driverId} | lap ${lapNumber}:`, data)
+          .then(data => ({ driverId, data }))
+          .catch(error => {
+            console.error(error)
+            return { driverId, data: [] }
           })
-          .catch(console.error)
       }
+      return Promise.resolve({ driverId, data: [] })
     })
+
+    Promise.all(fetchPromises)
+      .then(results => {
+        const lapTelemetryData = {}
+        results.forEach(({ driverId, data }) => {
+          lapTelemetryData[driverId] = data
+        })
+
+        setTelemetryData(prev => ({
+          ...prev,
+          [lapNumber]: lapTelemetryData
+        }))
+      })
   }
 
   useEffect(() => {
@@ -373,43 +542,68 @@ export default function Stats() {
                     })
                     const sortedLapNumbers = Array.from(allLapNumbers).sort((a, b) => a - b)
 
-                    return sortedLapNumbers.map(lapNumber => (
-                      <tr key={lapNumber}>
-                        <td className="p-2 md:p-4 border-b border-blue-gray-50 font-medium sticky left-0 bg-white min-w-[60px]">{lapNumber}</td>
-                        {selectedDrivers.map(driverId => {
-                          const driverLaps = allDriverLaps[driverId] || []
-                          const lap = driverLaps.find(l => l.lapNumber === lapNumber)
-                          const tyreInfo = getTyreInfoForLap(driverId, lapNumber)
+                    return sortedLapNumbers.flatMap(lapNumber => {
+                      const rows = []
 
-                          return (
-                            <td key={`${lapNumber}-${driverId}`} className="p-2 md:p-4 border-b border-blue-gray-50 text-center text-sm">
-                              {lap ? (
-                                <div className="flex flex-col items-center space-y-1">
-                                  <span className="font-medium">{millisecondsToMinuteFormat(lap.lapDurationMs)}</span>
-                                  {tyreInfo && (
-                                    <div className="text-xs text-gray-600 flex items-center space-x-1">
-                                      <span className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                                        {tyreInfo.compound}
-                                      </span>
-                                      <span>S{tyreInfo.stintNumber}</span>
-                                      <span>{tyreInfo.tyreAge}L</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : '-'}
+                      rows.push(
+                        <tr key={lapNumber}>
+                          <td className="p-2 md:p-4 border-b border-blue-gray-50 font-medium sticky left-0 bg-white min-w-[60px]">{lapNumber}</td>
+                          {selectedDrivers.map(driverId => {
+                            const driverLaps = allDriverLaps[driverId] || []
+                            const lap = driverLaps.find(l => l.lapNumber === lapNumber)
+                            const tyreInfo = getTyreInfoForLap(driverId, lapNumber)
+
+                            return (
+                              <td key={`${lapNumber}-${driverId}`} className="p-2 md:p-4 border-b border-blue-gray-50 text-center text-sm">
+                                {lap ? (
+                                  <div className="flex flex-col items-center space-y-1">
+                                    <span className="font-medium">{millisecondsToMinuteFormat(lap.lapDurationMs)}</span>
+                                    {tyreInfo && (
+                                      <div className="text-xs text-gray-600 flex items-center space-x-1">
+                                        <span className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                                          {tyreInfo.compound}
+                                        </span>
+                                        <span>S{tyreInfo.stintNumber}</span>
+                                        <span>{tyreInfo.tyreAge}L</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : '-'}
+                              </td>
+                            )
+                          })}
+                          <td className="p-2 md:p-4 border-b border-blue-gray-50 text-center">
+                            <button
+                              onClick={() => handleShowTelemetry(lapNumber)}
+                              className={`px-3 py-1 text-white text-xs rounded transition-colors ${
+                                expandedRows.has(lapNumber)
+                                  ? 'bg-red-500 hover:bg-red-600'
+                                  : 'bg-green-500 hover:bg-green-600'
+                              }`}
+                            >
+                              {expandedRows.has(lapNumber) ? 'Hide Telemetry' : 'Show Telemetry'}
+                            </button>
+                          </td>
+                        </tr>
+                      )
+
+                      if (expandedRows.has(lapNumber) && telemetryData[lapNumber]) {
+                        rows.push(
+                          <tr key={`${lapNumber}-telemetry`}>
+                            <td colSpan={selectedDrivers.length + 2} className="p-4 bg-gray-50 border-b border-blue-gray-50">
+                              <TelemetryChart
+                                lapNumber={lapNumber}
+                                telemetryData={telemetryData[lapNumber]}
+                                selectedDrivers={selectedDrivers}
+                                drivers={drivers}
+                              />
                             </td>
-                          )
-                        })}
-                        <td className="p-2 md:p-4 border-b border-blue-gray-50 text-center">
-                          <button
-                            onClick={() => handleShowTelemetry(lapNumber)}
-                            className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
-                          >
-                            Show Telemetry
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                          </tr>
+                        )
+                      }
+
+                      return rows
+                    })
                   })()}
                 </tbody>
               </table>
