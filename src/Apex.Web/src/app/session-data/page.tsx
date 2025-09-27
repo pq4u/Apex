@@ -97,6 +97,7 @@ export default function Stats() {
     }
   }, [selectedDrivers, selectedSession])
   
+  
   const getTyreInfoForLap = (driverId: number, lapNumber: number) => {
     const driverStints = allDriverStints[driverId] || []
     const stint = driverStints.find(s => lapNumber >= s.startLap && lapNumber <= s.endLap)
@@ -105,6 +106,38 @@ export default function Stats() {
       stintNumber: stint.stintNumber,
       tyreAge: stint.startTyreAge + (lapNumber - stint.startLap)
     } : null
+  }
+
+  const handleShowTelemetry = (lapNumber: number) => {
+    selectedDrivers.forEach(driverId => {
+      const driverLaps = allDriverLaps[driverId] || []
+      const currentLap = driverLaps.find(l => l.lapNumber === lapNumber)
+
+      if (currentLap) {
+        const nextLap = driverLaps.find(l => l.lapNumber === lapNumber + 1)
+        const dateFrom = currentLap.startDate
+        let dateTo
+
+        if (nextLap) {
+          const nextLapDate = new Date(nextLap.startDate)
+          nextLapDate.setMilliseconds(nextLapDate.getMilliseconds() - 1)
+          dateTo = nextLapDate.toISOString()
+        } else {
+          const currentLapDate = new Date(currentLap.startDate)
+          currentLapDate.setMinutes(currentLapDate.getMinutes() + 3)
+          dateTo = currentLapDate.toISOString()
+        }
+
+        const telemetryUrl = `http://localhost:5001/telemetry?sessionId=${selectedSession}&driverId=${driverId}&dateFrom=${dateFrom}&dateTo=${dateTo}`
+
+        fetch(telemetryUrl)
+          .then(res => res.json())
+          .then(data => {
+            console.log(`telemetry data: driver id ${driverId} | lap ${lapNumber}:`, data)
+          })
+          .catch(console.error)
+      }
+    })
   }
 
   useEffect(() => {
@@ -328,6 +361,7 @@ export default function Stats() {
                         </th>
                       )
                     })}
+                    <th className="p-2 md:p-4 border-b border-blue-gray-100 bg-blue-gray-50 min-w-[120px] text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -366,6 +400,14 @@ export default function Stats() {
                             </td>
                           )
                         })}
+                        <td className="p-2 md:p-4 border-b border-blue-gray-50 text-center">
+                          <button
+                            onClick={() => handleShowTelemetry(lapNumber)}
+                            className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                          >
+                            Show Telemetry
+                          </button>
+                        </td>
                       </tr>
                     ))
                   })()}
