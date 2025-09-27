@@ -20,7 +20,7 @@ public class StintController : ControllerBase
     {
         var stints = await _getStintsInSessionQueryHandler.HandleAsync(query);
 
-        var result = stints.Select(x => new StintResultDto
+        var result = stints?.Select(x => new StintResultDto
         {
             SessionId = x.SessionId,
             DriverId = x.DriverId,

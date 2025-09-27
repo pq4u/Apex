@@ -13,9 +13,7 @@ public class LapController : ControllerBase
     private readonly IQueryHandler<GetDriverLapsInSessionQuery, IEnumerable<Lap>> _getDriverLapsInSessionQueryHandler;
 
     public LapController(IQueryHandler<GetDriverLapsInSessionQuery, IEnumerable<Lap>> getDriverLapsInSessionQueryHandler)
-    {
-        _getDriverLapsInSessionQueryHandler = getDriverLapsInSessionQueryHandler;
-    }
+        =>_getDriverLapsInSessionQueryHandler = getDriverLapsInSessionQueryHandler;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LapResultDto>>> GetDriverLaps([FromQuery] GetDriverLapsInSessionQuery query)
@@ -28,7 +26,7 @@ public class LapController : ControllerBase
             SessionId = x.SessionId,
             DriverId = x.DriverId,
             LapNumber = x.LapNumber,
-            DateStart = x.DateStart,
+            StartDate = x.DateStart,
             LapDurationMs = x.LapDurationMs,
             DurationSector1Ms = x.DurationSector1Ms,
             DurationSector2Ms = x.DurationSector2Ms,

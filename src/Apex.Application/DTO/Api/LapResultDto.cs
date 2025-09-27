@@ -6,7 +6,7 @@ public class LapResultDto
     public int SessionId { get; set; }
     public int DriverId { get; set; }
     public int LapNumber { get; set; }
-    public DateTime? DateStart { get; set; }
+    public DateTime? StartDate { get; set; }
     public int? LapDurationMs { get; set; }
     public int? DurationSector1Ms { get; set; }
     public int? DurationSector2Ms { get; set; }
