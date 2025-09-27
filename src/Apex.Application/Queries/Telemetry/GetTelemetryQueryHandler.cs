@@ -11,6 +11,6 @@ public class GetTelemetryQueryHandler : IQueryHandler<GetTelemetryQuery, IEnumer
     public GetTelemetryQueryHandler(ITelemetryRepository telemetryRepository)
         => _telemetryRepository = telemetryRepository;
 
-    public async Task<IEnumerable<TelemetryData>> HandleAsync(GetTelemetryQuery query)
-        => await _telemetryRepository.GetCarDataAsync(query.SessionId, query.DriverId);
+    public async Task<IEnumerable<TelemetryData>?> HandleAsync(GetTelemetryQuery query)
+        => await _telemetryRepository.GetCarDataAsync(query.SessionId, query.DriverId, query.DateFrom, query.DateTo);
 }

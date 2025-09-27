@@ -6,5 +6,5 @@ public interface ITelemetryRepository
 {
     Task BulkInsertCarDataAsync(List<TelemetryData> carDataList, CancellationToken cancellationToken);
     Task<long> GetCarDataCountAsync(int sessionId, int driverId);
-    Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId);
+    Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo);
 }

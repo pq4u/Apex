@@ -76,7 +76,7 @@ public class TelemetryRepository : ITelemetryRepository
         }
     }
 
-    public async Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId)
+    public async Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo)
     {
         try
         {
@@ -87,12 +87,19 @@ public class TelemetryRepository : ITelemetryRepository
                     FROM telemetry.car_data
                     WHERE session_id = @SessionId AND driver_id = @DriverId";
 
+            if (dateFrom is not null && dateTo is not null)
+            {
+                sql += " AND time BETWEEN @DateFrom AND @DateTo";
+            }
+            
             sql += " ORDER BY time";
 
             return await connection.QueryAsync<TelemetryData>(sql, new
             {
                 SessionId = sessionId,
-                DriverId = driverId
+                DriverId = driverId,
+                DateFrom = dateFrom,
+                Dateto = dateTo
             });
         }
         catch (Exception ex)

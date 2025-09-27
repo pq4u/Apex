@@ -18,7 +18,7 @@ public class TelemetryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TelemetryDataResultDto>>> Get([FromQuery] GetTelemetryQuery query)
+    public async Task<ActionResult<IEnumerable<TelemetryDataResultDto>?>> Get([FromQuery] GetTelemetryQuery query)
     {
         var telemetryData = await _getTelemetryQueryHandler.HandleAsync(query);
 
