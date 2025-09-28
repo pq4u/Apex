@@ -35,21 +35,7 @@ export function useTelemetryData() {
           return { driverId, data: [] };
         }
 
-        const nextLap = driverLaps.find(l => l.lapNumber === lapNumber + 1);
-        const dateFrom = currentLap.startDate;
-        let dateTo: string;
-
-        if (nextLap) {
-          const nextLapDate = new Date(nextLap.startDate);
-          nextLapDate.setMilliseconds(nextLapDate.getMilliseconds() - 1);
-          dateTo = nextLapDate.toISOString();
-        } else {
-          const currentLapDate = new Date(currentLap.startDate);
-          currentLapDate.setMinutes(currentLapDate.getMinutes() + 3);
-          dateTo = currentLapDate.toISOString();
-        }
-
-        const telemetryUrl = `${API_BASE_URL}/telemetry?sessionId=${selectedSession}&driverId=${driverId}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
+        const telemetryUrl = `${API_BASE_URL}/telemetry?sessionId=${selectedSession}&driverId=${driverId}&lapNumber=${lapNumber}`;
 
         try {
           const response = await fetch(telemetryUrl);
