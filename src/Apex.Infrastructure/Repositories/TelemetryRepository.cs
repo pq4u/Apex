@@ -76,7 +76,7 @@ public class TelemetryRepository : ITelemetryRepository
         }
     }
 
-    public async Task<IEnumerable<TelemetryData>> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo)
+    public async Task<IEnumerable<TelemetryData>?> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo)
     {
         try
         {

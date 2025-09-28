@@ -10,9 +10,9 @@ namespace Apex.Api.Controllers;
 [Route("telemetry")]
 public class TelemetryController : ControllerBase
 {
-    private readonly IQueryHandler<GetTelemetryQuery, IEnumerable<TelemetryData>> _getTelemetryQueryHandler;
+    private readonly IQueryHandler<GetTelemetryQuery, IEnumerable<TelemetryData>?> _getTelemetryQueryHandler;
 
-    public TelemetryController(IQueryHandler<GetTelemetryQuery, IEnumerable<TelemetryData>> getTelemetryQueryHandler)
+    public TelemetryController(IQueryHandler<GetTelemetryQuery, IEnumerable<TelemetryData>?> getTelemetryQueryHandler)
     {
         _getTelemetryQueryHandler = getTelemetryQueryHandler;
     }
@@ -22,7 +22,7 @@ public class TelemetryController : ControllerBase
     {
         var telemetryData = await _getTelemetryQueryHandler.HandleAsync(query);
 
-        var result = telemetryData.Select(x => new TelemetryDataResultDto
+        var result = telemetryData?.Select(x => new TelemetryDataResultDto
         {
             Time = x.Time,
             SessionId = x.SessionId,

@@ -6,4 +6,5 @@ public interface ILapRepository
     Task<IEnumerable<Lap>?> GetDriverLapsInSessionAsync(int sessionId, int driverId);
     Task<int> GetDriverLapsInSessionCountAsync(int sessionId, int driverId);
     Task AddDriverLapsAsync(List<Lap> laps);
+    Task<IEnumerable<Lap>?> GetConsecutiveLapsAsync(int sessionId, int driverId, int lapNumber);
 }
