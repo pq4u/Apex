@@ -35,25 +35,26 @@ export function TelemetryChart({ lapNumber, telemetryData, selectedDrivers, driv
     console.log('chart telemetry data:', telemetryData);
 
     const datasets: Chart.ChartDataset<'line'>[] = [];
-    const allTimestamps: Date[] = [];
 
     selectedDrivers.forEach((driverId, index) => {
       const driverData = telemetryData[driverId] || [];
       const driver = drivers.find(d => d.id === driverId);
 
       if (driverData.length > 0) {
-        const chartData = driverData
-          .filter(point => point.speed !== null && point.speed !== undefined)
-          .map(point => {
+        const validPoints = driverData.filter(point => point.speed !== null && point.speed !== undefined);
+
+        if (validPoints.length > 0) {
+          const driverStartTime = new Date(validPoints[0].time);
+
+          const chartData = validPoints.map(point => {
             const timestamp = new Date(point.time);
-            allTimestamps.push(timestamp);
+            const secondsFromStart = (timestamp.getTime() - driverStartTime.getTime()) / 1000;
             return {
-              x: timestamp,
+              x: secondsFromStart,
               y: point.speed
             }
           });
 
-        if (chartData.length > 0) {
           datasets.push({
             label: driver?.nameAcronym || `Driver ${driverId}`,
             data: chartData,
@@ -68,9 +69,8 @@ export function TelemetryChart({ lapNumber, telemetryData, selectedDrivers, driv
       }
     })
 
-    if (datasets.length > 0 && allTimestamps.length > 0) {
-      const minTime = new Date(Math.min(...allTimestamps.map(t => t.getTime())));
-      const maxTime = new Date(Math.max(...allTimestamps.map(t => t.getTime())));
+    if (datasets.length > 0) {
+      const maxDuration = Math.max(...datasets.flatMap(d => d.data.map((point: any) => point.x)));
 
       const context = chartRef.current.getContext('2d');
       if (context) {
@@ -98,19 +98,20 @@ export function TelemetryChart({ lapNumber, telemetryData, selectedDrivers, driv
             },
             scales: {
               x: {
-                type: 'time',
-                min: minTime,
-                max: maxTime,
-                time: {
-                  displayFormats: {
-                    millisecond: 'HH:mm:ss.SSS',
-                    second: 'HH:mm:ss',
-                    minute: 'HH:mm'
-                  }
-                },
+                type: 'linear',
+                min: 0,
+                max: maxDuration,
                 title: {
                   display: true,
-                  text: 'Time'
+                  text: 'Time (seconds)'
+                },
+                ticks: {
+                  callback: function(value: any) {
+                    const totalSeconds = Math.floor(value);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                  }
                 }
               },
               y: {
