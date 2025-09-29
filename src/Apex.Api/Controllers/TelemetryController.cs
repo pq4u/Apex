@@ -29,11 +29,10 @@ public class TelemetryController : ControllerBase
             DriverId = x.DriverId,
             Speed = x.Speed,
             Rpm = x.Rpm,
-            Gear = x.Gear,
+            Gear = x.NGear,
             Throttle = x.Throttle,
             Brake = x.Brake,
-            Drs = x.Drs,
-            NGear = x.NGear,
+            Drs = x.Drs
         });
 
         return Ok(result);
