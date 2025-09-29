@@ -36,6 +36,7 @@ export interface TelemetryPoint {
   speed: number
   throttle: number
   brake: number
+  rpm: number
 }
 
 export interface TyreInfo {
