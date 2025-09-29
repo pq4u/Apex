@@ -137,15 +137,277 @@ export function TelemetryChart({ lapNumber, telemetryData, selectedDrivers, driv
   const hasData = telemetryData && Object.keys(telemetryData).length > 0;
 
   return (
-    <div className="w-full">
-      <div style={{ height: '400px' }}>
-        <canvas ref={chartRef} />
+    <div className="w-full space-y-6">
+      <div>
+        <div style={{ height: '400px' }}>
+          <canvas ref={chartRef} />
+        </div>
       </div>
+
+      {hasData && (
+        <>
+          <ThrottleChart
+            lapNumber={lapNumber}
+            telemetryData={telemetryData}
+            selectedDrivers={selectedDrivers}
+            drivers={drivers}
+          />
+          <BrakeChart
+            lapNumber={lapNumber}
+            telemetryData={telemetryData}
+            selectedDrivers={selectedDrivers}
+            drivers={drivers}
+          />
+        </>
+      )}
+
       {!hasData && (
         <div className="text-center text-gray-500 py-8">
           Loading telemetry data...
         </div>
       )}
+    </div>
+  )
+}
+
+function ThrottleChart({ lapNumber, telemetryData, selectedDrivers, drivers }: TelemetryChartProps) {
+  const chartRef = useRef<HTMLCanvasElement>(null);
+  const chartInstanceRef = useRef<Chart.Chart | null>(null);
+
+  useEffect(() => {
+    if (!chartRef.current || !telemetryData) return;
+
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
+    }
+
+    const datasets: Chart.ChartDataset<'line'>[] = [];
+
+    selectedDrivers.forEach((driverId, index) => {
+      const driverData = telemetryData[driverId] || [];
+      const driver = drivers.find(d => d.id === driverId);
+
+      if (driverData.length > 0) {
+        const validPoints = driverData.filter(point => point.throttle !== null && point.throttle !== undefined);
+
+        if (validPoints.length > 0) {
+          const driverStartTime = new Date(validPoints[0].time);
+
+          const chartData = validPoints.map(point => {
+            const timestamp = new Date(point.time);
+            const secondsFromStart = (timestamp.getTime() - driverStartTime.getTime()) / 1000;
+            return {
+              x: secondsFromStart,
+              y: point.throttle
+            }
+          });
+
+          datasets.push({
+            label: driver?.nameAcronym || `Driver ${driverId}`,
+            data: chartData,
+            borderColor: CHART_COLORS[index % CHART_COLORS.length],
+            backgroundColor: CHART_COLORS[index % CHART_COLORS.length].replace('1)', '0.2)'),
+            tension: 0.1,
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2
+          });
+        }
+      }
+    })
+
+    if (datasets.length > 0) {
+      const maxDuration = Math.max(...datasets.flatMap(d => d.data.map((point: any) => point.x)));
+
+      const context = chartRef.current.getContext('2d');
+      if (context) {
+        chartInstanceRef.current = new Chart.Chart(context, {
+          type: 'line',
+          data: {
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Throttle - lap ${lapNumber}`
+              },
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            },
+            scales: {
+              x: {
+                type: 'linear',
+                min: 0,
+                max: maxDuration,
+                title: {
+                  display: true,
+                  text: 'Time (seconds)'
+                },
+                ticks: {
+                  callback: function(value: any) {
+                    const totalSeconds = Math.floor(value);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                  }
+                }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                title: {
+                  display: true,
+                  text: 'Throttle (%)'
+                }
+              }
+            }
+          }
+        })
+      }
+    }
+
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+    };
+  }, [telemetryData, selectedDrivers, drivers, lapNumber])
+
+  return (
+    <div>
+      <div style={{ height: '300px' }}>
+        <canvas ref={chartRef} />
+      </div>
+    </div>
+  )
+}
+
+function BrakeChart({ lapNumber, telemetryData, selectedDrivers, drivers }: TelemetryChartProps) {
+  const chartRef = useRef<HTMLCanvasElement>(null);
+  const chartInstanceRef = useRef<Chart.Chart | null>(null);
+
+  useEffect(() => {
+    if (!chartRef.current || !telemetryData) return;
+
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
+    }
+
+    const datasets: Chart.ChartDataset<'line'>[] = [];
+
+    selectedDrivers.forEach((driverId, index) => {
+      const driverData = telemetryData[driverId] || [];
+      const driver = drivers.find(d => d.id === driverId);
+
+      if (driverData.length > 0) {
+        const validPoints = driverData.filter(point => point.brake !== null && point.brake !== undefined);
+
+        if (validPoints.length > 0) {
+          const driverStartTime = new Date(validPoints[0].time);
+
+          const chartData = validPoints.map(point => {
+            const timestamp = new Date(point.time);
+            const secondsFromStart = (timestamp.getTime() - driverStartTime.getTime()) / 1000;
+            return {
+              x: secondsFromStart,
+              y: point.brake
+            }
+          });
+
+          datasets.push({
+            label: driver?.nameAcronym || `Driver ${driverId}`,
+            data: chartData,
+            borderColor: CHART_COLORS[index % CHART_COLORS.length],
+            backgroundColor: CHART_COLORS[index % CHART_COLORS.length].replace('1)', '0.2)'),
+            tension: 0.1,
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2
+          });
+        }
+      }
+    })
+
+    if (datasets.length > 0) {
+      const maxDuration = Math.max(...datasets.flatMap(d => d.data.map((point: any) => point.x)));
+
+      const context = chartRef.current.getContext('2d');
+      if (context) {
+        chartInstanceRef.current = new Chart.Chart(context, {
+          type: 'line',
+          data: {
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Brake - lap ${lapNumber}`
+              },
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            },
+            scales: {
+              x: {
+                type: 'linear',
+                min: 0,
+                max: maxDuration,
+                title: {
+                  display: true,
+                  text: 'Time (seconds)'
+                },
+                ticks: {
+                  callback: function(value: any) {
+                    const totalSeconds = Math.floor(value);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const seconds = totalSeconds % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                  }
+                }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                title: {
+                  display: true,
+                  text: 'Brake (%)'
+                }
+              }
+            }
+          }
+        })
+      }
+    }
+
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+    };
+  }, [telemetryData, selectedDrivers, drivers, lapNumber])
+
+  return (
+    <div>
+      <div style={{ height: '300px' }}>
+        <canvas ref={chartRef} />
+      </div>
     </div>
   )
 }

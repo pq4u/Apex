@@ -34,6 +34,8 @@ export interface Stint {
 export interface TelemetryPoint {
   time: string
   speed: number
+  throttle: number
+  brake: number
 }
 
 export interface TyreInfo {
