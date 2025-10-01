@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { TelemetryPoint, Lap } from '../types'
 
-const API_BASE_URL = 'http://localhost:5001'
+const API_BASE_URL = 'http://localhost:5000'
 
 export function useTelemetryData() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());

@@ -30,6 +30,22 @@ services:
       dockerfile: src/Apex.Worker/Dockerfile
     depends_on:
       - database
+  
+  web:
+    container_name: apex_web
+    build:
+      context: ./src/Apex.Web
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./src/Apex.Web:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    stdin_open: true
+    tty: true
+    command: npm run dev
 
 volumes:
   apex_data:
