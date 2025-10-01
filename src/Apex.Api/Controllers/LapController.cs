@@ -1,5 +1,6 @@
 ﻿using Apex.Application.Abstractions;
 using Apex.Application.DTO.Api;
+using Apex.Application.Mappings;
 using Apex.Application.Queries.Laps;
 using Apex.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -20,24 +21,7 @@ public class LapController : ControllerBase
     {
         var laps = await _getDriverLapsInSessionQueryHandler.HandleAsync(query);
 
-        var result = laps.Select(x => new LapResultDto
-        {
-            Id = x.Id,
-            SessionId = x.SessionId,
-            DriverId = x.DriverId,
-            LapNumber = x.LapNumber,
-            StartDate = x.DateStart,
-            LapDurationMs = x.LapDurationMs,
-            DurationSector1Ms = x.DurationSector1Ms,
-            DurationSector2Ms = x.DurationSector2Ms,
-            DurationSector3Ms = x.DurationSector3Ms,
-            I1Speed = x.I1Speed,
-            I2Speed = x.I2Speed,
-            FinishLineSpeed = x.FinishLineSpeed,
-            StSpeed = x.StSpeed,
-            IsPitOutLap = x.IsPitOutLap,
-            SegmentsJson = x.SegmentsJson
-        });
+        var result = laps.Select(x => x.ToResultDto());
         
         return Ok(result);
     }

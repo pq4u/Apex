@@ -1,6 +1,7 @@
 ﻿using Apex.Application.Abstractions;
 using Apex.Application.DTO;
 using Apex.Application.DTO.Api;
+using Apex.Application.Mappings;
 using Apex.Application.Queries.Meetings;
 using Apex.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -24,15 +25,7 @@ public class MeetingController : ControllerBase
         var query = new GetMeetingsQuery();
         var meetings = await _getMeetingsQueryHandler.HandleAsync(query);
 
-        var response = meetings.Select(m => new MeetingResultDto
-        {
-            Id = m.Id,
-            Name = m.Name,
-            Location = m.Location,
-            CountryName = m.CountryName,
-            CircuitName = m.CircuitShortName,
-            StartDate = m.DateStart
-        });
+        var response = meetings.Select(x => x.ToResultDto());
 
         return Ok(response);
 

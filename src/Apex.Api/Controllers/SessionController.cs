@@ -1,5 +1,6 @@
 ﻿using Apex.Application.Abstractions;
 using Apex.Application.DTO.Api;
+using Apex.Application.Mappings;
 using Apex.Application.Queries.Sessions;
 using Apex.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -22,14 +23,7 @@ public class SessionController : ControllerBase
     {
         var sessions = await _getSessionsInMeetingQueryHandler.HandleAsync(query);
 
-        var result = sessions.Select(x => new SessionResultDto
-        {
-            Id = x.Id,
-            MeetingId = x.MeetingId,
-            Name = x.Name,
-            StartDate = x.StartDate,
-            EndDate = x.EndDate
-        });
+        var result = sessions.Select(x=> x.ToResultDto());
         
         return Ok(result);
     }

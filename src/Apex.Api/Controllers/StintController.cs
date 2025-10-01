@@ -1,5 +1,6 @@
 ﻿using Apex.Application.Abstractions;
 using Apex.Application.DTO.Api;
+using Apex.Application.Mappings;
 using Apex.Application.Queries.Stints;
 using Apex.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -20,16 +21,7 @@ public class StintController : ControllerBase
     {
         var stints = await _getStintsInSessionQueryHandler.HandleAsync(query);
 
-        var result = stints?.Select(x => new StintResultDto
-        {
-            SessionId = x.SessionId,
-            DriverId = x.DriverId,
-            StintNumber = x.StintNumber,
-            StartLap = x.LapStart,
-            EndLap = x.LapEnd,
-            Compound = x.Compound,
-            StartTyreAge = x.TyreAgeAtStart
-        });
+        var result = stints?.Select(x => x.ToResultDto());
         
         return Ok(result);
     }
