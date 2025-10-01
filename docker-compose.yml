@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  timescaledb:
+  database:
     image: timescale/timescaledb:latest-pg16
-    container_name: f1-timescaledb
+    container_name: apex_database
     environment:
       POSTGRES_DB: apex_db
       POSTGRES_USER: postgres
@@ -11,8 +11,25 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - f1_data:/var/lib/postgresql/data
-      - ./setup-timescale.sql:/docker-entrypoint-initdb.d/20-timescale.sql
+      - apex_data:/var/lib/postgresql/data
+  
+  api:
+    container_name: apex_api
+    build:
+      context: .
+      dockerfile: src/Apex.Api/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - database
+    
+  worker:
+    container_name: apex_worker
+    build:
+      context: .
+      dockerfile: src/Apex.Worker/Dockerfile
+    depends_on:
+      - database
 
 volumes:
-  f1_data:
+  apex_data:
