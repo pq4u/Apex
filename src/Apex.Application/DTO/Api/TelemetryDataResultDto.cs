@@ -1,6 +1,6 @@
 ﻿namespace Apex.Application.DTO.Api;
 
-public class TelemetryDataResultDto
+public class TelemetryResultDto
 {
     public DateTime Time { get; set; }
     public int SessionId { get; set; }

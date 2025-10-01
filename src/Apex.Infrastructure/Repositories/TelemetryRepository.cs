@@ -14,7 +14,7 @@ public class TelemetryRepository : ITelemetryRepository
     public TelemetryRepository(IConfiguration configuration)
         => _connectionString = configuration.GetConnectionString("ApexDb")!;
 
-    public async Task BulkInsertCarDataAsync(List<TelemetryData> carDataList, CancellationToken cancellationToken)
+    public async Task BulkInsertCarDataAsync(List<Telemetry> carDataList, CancellationToken cancellationToken)
     {
         if (!carDataList.Any()) return;
 
@@ -76,7 +76,7 @@ public class TelemetryRepository : ITelemetryRepository
         }
     }
 
-    public async Task<IEnumerable<TelemetryData>?> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo)
+    public async Task<IEnumerable<Telemetry>?> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo)
     {
         try
         {
@@ -94,7 +94,7 @@ public class TelemetryRepository : ITelemetryRepository
             
             sql += " ORDER BY time";
 
-            return await connection.QueryAsync<TelemetryData>(sql, new
+            return await connection.QueryAsync<Telemetry>(sql, new
             {
                 SessionId = sessionId,
                 DriverId = driverId,

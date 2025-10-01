@@ -4,7 +4,7 @@ using Apex.Domain.TimeSeries;
 
 namespace Apex.Application.Queries.Telemetry;
 
-public class GetTelemetryQueryHandler : IQueryHandler<GetTelemetryQuery, IEnumerable<TelemetryData>?>
+public class GetTelemetryQueryHandler : IQueryHandler<GetTelemetryQuery, IEnumerable<Domain.TimeSeries.Telemetry>?>
 {
     private readonly ITelemetryRepository _telemetryRepository;
     private readonly ILapRepository _lapRepository;
@@ -15,7 +15,7 @@ public class GetTelemetryQueryHandler : IQueryHandler<GetTelemetryQuery, IEnumer
         _lapRepository = lapRepository;
     }
 
-    public async Task<IEnumerable<TelemetryData>?> HandleAsync(GetTelemetryQuery query)
+    public async Task<IEnumerable<Domain.TimeSeries.Telemetry>?> HandleAsync(GetTelemetryQuery query)
     {
         var lapDatesRange = await _lapRepository.GetConsecutiveLapsAsync(query.SessionId, query.DriverId, query.LapNumber);
 

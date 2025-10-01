@@ -1,6 +1,6 @@
 ﻿namespace Apex.Domain.TimeSeries;
 
-public class TelemetryData
+public class Telemetry
 {
     public DateTime Time { get; set; }
     public int SessionId { get; set; }

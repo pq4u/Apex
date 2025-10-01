@@ -4,7 +4,7 @@ namespace Apex.Domain.Repositories;
 
 public interface ITelemetryRepository
 {
-    Task BulkInsertCarDataAsync(List<TelemetryData> carDataList, CancellationToken cancellationToken);
+    Task BulkInsertCarDataAsync(List<Telemetry> carDataList, CancellationToken cancellationToken);
     Task<long> GetCarDataCountAsync(int sessionId, int driverId);
-    Task<IEnumerable<TelemetryData>?> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo);
+    Task<IEnumerable<Telemetry>?> GetCarDataAsync(int sessionId, int driverId, DateTime? dateFrom, DateTime? dateTo);
 }
