@@ -4,7 +4,7 @@ using Serilog;
 
 namespace Apex.Worker.Configuration;
 
-public static class HttpClientPolicies
+internal static class HttpClientPolicies
 {
     public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() => HttpPolicyExtensions
             .HandleTransientHttpError()

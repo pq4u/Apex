@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class SessionDriverRepository : ISessionDriverRepository
+internal class SessionDriverRepository : ISessionDriverRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<SessionDriver> _sessionDrivers;

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class MeetingRepository : IMeetingRepository
+internal class MeetingRepository : IMeetingRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<Meeting> _meetings;

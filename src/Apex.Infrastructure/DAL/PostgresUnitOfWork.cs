@@ -1,6 +1,6 @@
 ﻿namespace Apex.Infrastructure.DAL;
 
-public class PostgresUnitOfWork : IUnitOfWork
+internal class PostgresUnitOfWork : IUnitOfWork
 {
     private readonly ApexDbContext _dbContext;
     

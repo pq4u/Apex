@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class DriverRepository : IDriverRepository
+internal class DriverRepository : IDriverRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<Driver> _drivers;

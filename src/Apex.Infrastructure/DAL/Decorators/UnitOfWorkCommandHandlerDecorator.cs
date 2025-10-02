@@ -2,7 +2,7 @@
 
 namespace Apex.Infrastructure.DAL.Decorators;
 
-public class UnitOfWorkCommandHandlerDecorator<TCommand> : ICommandHandler<TCommand> where TCommand : class, ICommand
+internal class UnitOfWorkCommandHandlerDecorator<TCommand> : ICommandHandler<TCommand> where TCommand : class, ICommand
 {
     private readonly ICommandHandler<TCommand> _commandHandler;
     private readonly IUnitOfWork _unitOfWork;

@@ -1,6 +1,6 @@
 ﻿namespace Apex.Infrastructure.DAL;
 
-public interface IUnitOfWork
+internal interface IUnitOfWork
 {
     Task ExecuteAsync(Func<Task> action);
 }

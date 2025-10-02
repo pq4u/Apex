@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class TeamRepository : ITeamRepository
+internal class TeamRepository : ITeamRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<Team> _teams;

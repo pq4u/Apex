@@ -7,7 +7,7 @@ using Serilog;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class TelemetryRepository : ITelemetryRepository
+internal class TelemetryRepository : ITelemetryRepository
 {
     private readonly string _connectionString;
 

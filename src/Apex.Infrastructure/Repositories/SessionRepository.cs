@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class SessionRepository : ISessionRepository
+internal class SessionRepository : ISessionRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<Session> _sessions;

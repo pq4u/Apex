@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Apex.Infrastructure.DAL;
 
-public class ApexDbContext : DbContext
+internal class ApexDbContext : DbContext
 {
     public ApexDbContext(DbContextOptions<ApexDbContext> options) : base(options) { }
 

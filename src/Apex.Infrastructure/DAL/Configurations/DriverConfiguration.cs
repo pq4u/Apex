@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Apex.Infrastructure.DAL.Configurations;
 
-public class DriverConfiguration : IEntityTypeConfiguration<Driver>
+internal class DriverConfiguration : IEntityTypeConfiguration<Driver>
 {
     public void Configure(EntityTypeBuilder<Driver> builder)
     {

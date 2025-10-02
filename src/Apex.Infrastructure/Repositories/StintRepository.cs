@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Apex.Infrastructure.Repositories;
 
-public class StintRepository : IStintRepository
+internal class StintRepository : IStintRepository
 {
     private readonly ApexDbContext _dbContext;
     private readonly DbSet<Stint> _stints;
