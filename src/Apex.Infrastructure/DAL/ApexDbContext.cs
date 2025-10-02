@@ -25,6 +25,8 @@ public class ApexDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApexDbContext).Assembly);
 
+        modelBuilder.ConvertObjectNamesToSnakeCase();
+
         var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
             v => v.ToUniversalTime(),
             v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
