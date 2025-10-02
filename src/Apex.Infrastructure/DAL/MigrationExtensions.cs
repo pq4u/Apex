@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Serilog;
@@ -13,8 +14,19 @@ public static class MigrationExtensions
     public static async Task<IApplicationBuilder> MigrateDatabase(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
-        var services = scope.ServiceProvider;
+        await MigrateDatabaseInternal(scope.ServiceProvider);
+        return app;
+    }
 
+    public static async Task<IHost> MigrateDatabase(this IHost host)
+    {
+        using var scope = host.Services.CreateScope();
+        await MigrateDatabaseInternal(scope.ServiceProvider);
+        return host;
+    }
+
+    private static async Task MigrateDatabaseInternal(IServiceProvider services)
+    {
         try
         {
             var dbContext = services.GetRequiredService<ApexDbContext>();
@@ -35,8 +47,6 @@ public static class MigrationExtensions
             logger.LogError(ex, "An error occurred while migrating the database");
             throw;
         }
-
-        return app;
     }
 
     private static async Task SetupTimescaleDB(IConfiguration configuration)

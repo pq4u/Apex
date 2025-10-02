@@ -11,13 +11,13 @@ using Serilog;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
+}
 
 builder.Logging.AddSerilog();
 
@@ -27,11 +27,9 @@ builder.Services.AddWorkerServices(builder.Configuration);
 
 var host = builder.Build();
 
-using (var scope = host.Services.CreateScope())
+if (builder.Environment.IsDevelopment())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApexDbContext>();
-    await dbContext.Database.MigrateAsync();
-    Console.WriteLine("Migrations applied");
+    await host.MigrateDatabase();
 }
 
 await host.RunAsync();

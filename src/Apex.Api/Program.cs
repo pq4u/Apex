@@ -4,6 +4,15 @@ using Apex.Infrastructure.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
+}
+
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -28,13 +37,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    await app.MigrateDatabase();
+    await ((IApplicationBuilder)app).MigrateDatabase();
 }
 
 app.UseCors();
 
 app.UseHttpsRedirection();
 app.MapControllers();
-
 
 await app.RunAsync();
