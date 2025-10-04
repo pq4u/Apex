@@ -1,39 +1,38 @@
 # Apex
 
-Apex is an application to analyze Formula 1 drivers telemetry, session data and other data related to this sport. The data are fetched from OpenF1 API.
+Apex is an application to analyze Formula 1 drivers telemetry, session data and other data related to this sport. The data is fetched from OpenF1 API.
 
 ## Architecture
 
-The application follows Clean Architecture principles with CQRS pattern, built on .NET 9 and Next.js 15.
+The application follows Clean Architecture principles with the CQRS pattern, built on .NET.
 
 ### Projects
 
 - **Apex.Domain** - Core business entities and domain logic
-- **Apex.Application** - Business logic with CQRS (Commands/Queries)
+- **Apex.Application** - Business logic with CQRS
 - **Apex.Infrastructure** - Data access layer with Entity Framework Core and TimescaleDB
 - **Apex.Api** - REST API built with ASP.NET Core
 - **Apex.Worker** - Background service for data ingestion from OpenF1 API
-- **Apex.Web** - Next.js frontend with React 19 and TailwindCSS
+- **Apex.Web** - Next.js frontend with React 19
 - **Apex.UnitTests** - Unit tests
 
 ### Technology Stack
 
 **Backend:**
 - .NET 9
-- Entity Framework Core with PostgreSQL
-- TimescaleDB (time-series extension for telemetry data)
-- Dapper for raw SQL queries
-- Serilog for logging
-- Polly for resilience and retry policies
+- Entity Framework Core
+- Dapper
+- Serilog
+- Polly
 
 **Frontend:**
-- Next.js 15 with Turbopack
+- Next.js 15
 - React 19
 - TailwindCSS v4
-- Chart.js for data visualization
+- Chart.js
 
 **Infrastructure:**
-- Docker & Docker Compose
+- Docker 
 - PostgreSQL with TimescaleDB extension
 
 ## Run Application
@@ -48,9 +47,9 @@ It will start Api, Worker, Web and PostgreSQL containers.
 
 ### Default Ports
 
-- **apex-api** - http://localhost:5000
-- **apex-web** - http://localhost:3001
-- **postgresql** - localhost:5432
+- **apex-api** - 5000
+- **apex-web** - 3001
+- **postgresql** - 5432
 
 ### API Documentation
 
@@ -62,7 +61,7 @@ Swagger UI is available in development mode at: http://localhost:5000/swagger
 
 - .NET 9 SDK
 - Node.js 20+
-- Docker & Docker Compose
+- Docker
 
 ### Database Migrations
 
@@ -81,3 +80,7 @@ dotnet ef migrations add MigrationName --project src/Apex.Infrastructure --start
 - Driver performance metrics
 - Lap time comparisons
 - Interactive data visualizations
+
+## To do
+
+Project is under development. To do list is available [here](to_do.MD)
