@@ -83,4 +83,4 @@ dotnet ef migrations add MigrationName --project src/Apex.Infrastructure --start
 
 ## To do
 
-Project is under development. To do list is available [here](to_do.MD)
+Project is under development. To do list is available [here](to_do.md)
