@@ -32,8 +32,7 @@ export default function SessionDataPage() {
   const {
     expandedRows,
     telemetryData,
-    fetchTelemetryForLap,
-    getTelemetryForLap
+    fetchTelemetryForLap
   } = useTelemetryData();
 
   const handleTelemetryToggle = (lapNumber: number) => {

@@ -18,10 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="">
+    <html lang="en">
       <body className="flex min-h-screen justify-center pt-8 px-2">
         <div className="w-full max-w-4xl">
-          <h1 className="text-3xl font-bold">Apex</h1>
           {children}
         </div>
       </body>

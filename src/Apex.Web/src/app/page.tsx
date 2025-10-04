@@ -4,35 +4,21 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <h1>
+    <div className="min-h-screen bg-white">
+      <main className="flex flex-col items-center justify-center min-h-screen px-4">
+        <h1 className="text-6xl font-bold mb-4 text-gray-900">
           Apex
         </h1>
-
-        <p>
+        <p className="text-xl text-gray-600 mb-8">
           F1 statistics, telemetry, and other nerd stuff
         </p>
-
-        <div className={styles.ctas}>
-          <Link
-            className={styles.primary}
-            href="/stats"
-            rel="noopener noreferrer"
-          >
-            Stats
-          </Link>
-          <a
-            href="/session-data"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Session data
-          </a>
-        </div>
+        <a href="/session-data"
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded">
+          Session Data
+        </a>
       </main>
-      <footer className={styles.footer}>
-        <a>Footer bla bla</a>
+      <footer className="fixed bottom-0 w-full py-4 text-center text-gray-500">
+        <a href="https://github.com/pq4u/Apex">GitHub</a>
       </footer>
     </div>
   );
