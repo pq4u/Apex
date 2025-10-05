@@ -1,6 +1,5 @@
 using Apex.Application.Client;
 using Apex.Worker.Configuration;
-using Apex.Worker.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -45,7 +45,7 @@ public class IngestLapsCommandHandlerTests
     {
         // arrange
         var command = new IngestLapsCommand(1234, 1234, 1234, 1234);
-        var laps = new List<LapDto>() { new() { Session_Key = 1234 } };
+        var laps = new List<LapDto>() { new() { SessionKey = 1234 } };
 
         _apiClient.GetLapsAsync(1234, 1234).Returns(laps);
         _lapRepository.GetDriverLapsInSessionCountAsync(1234, 1234).Returns(10);
@@ -65,7 +65,7 @@ public class IngestLapsCommandHandlerTests
         var driverId = 2;
         
         var command = new IngestLapsCommand(1234, sessionId, 1234, driverId);
-        var newLaps = new List<LapDto>() { new() { Session_Key = 1, Lap_Duration = 1234 }, new() { Session_Key = 1, Lap_Duration = 1235 } };
+        var newLaps = new List<LapDto>() { new() { SessionKey = 1, LapDuration = 1234 }, new() { SessionKey = 1, LapDuration = 1235 } };
     
         _apiClient.GetLapsAsync(1234, 1234).Returns(newLaps);
         _lapRepository.GetDriverLapsInSessionCountAsync(1234, 1234).Returns(0);

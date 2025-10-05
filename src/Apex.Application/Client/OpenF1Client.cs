@@ -1,9 +1,8 @@
-﻿using Apex.Application.Client;
+﻿using System.Text.Json;
 using Apex.Application.DTO;
 using Serilog;
-using System.Text.Json;
 
-namespace Apex.Worker.Services;
+namespace Apex.Application.Client;
 
 public class OpenF1ApiClient : IOpenF1ApiClient
 {

@@ -48,7 +48,7 @@ public class IngestStintsCommandHandler : ICommandHandler<IngestStintsCommand>
             }
             
             var stintsEntites = stints.Select(x => x.ToEntity(
-                command.SessionId, dbDrivers!.Where(d => d.DriverNumber == x.Driver_Number)!.First().Id));
+                command.SessionId, dbDrivers!.Where(d => d.DriverNumber == x.DriverNumber)!.First().Id));
 
             await _stintRepository.AddRangeAsync(stintsEntites);
 

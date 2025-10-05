@@ -43,9 +43,9 @@ public class IngestMeetingsCommandHandlerTests
         var command = new IngestMeetingsCommand();
         var meetingDto = new MeetingDto 
         { 
-            Meeting_Key = 1234,
-            Meeting_Name = "Poland Grand Prix",
-            Country_Name = "Poland"
+            MeetingKey = 1234,
+            MeetingName = "Poland Grand Prix",
+            CountryName = "Poland"
         };
         
         var existingMeeting = new Meeting 
@@ -71,9 +71,9 @@ public class IngestMeetingsCommandHandlerTests
         var command = new IngestMeetingsCommand();
         var meetingDto = new MeetingDto 
         { 
-            Meeting_Key = 1234,
-            Meeting_Name = "New Grand Prix",
-            Country_Name = "New Country"
+            MeetingKey = 1234,
+            MeetingName = "New Grand Prix",
+            CountryName = "New Country"
         };
 
         _apiClient.GetMeetingsAsync().Returns(new List<MeetingDto>{ meetingDto });

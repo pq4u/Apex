@@ -39,7 +39,7 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
             foreach (var driver in driverDtos)
             {
                 // Add driver if not exists
-                var existingDriver = dbDrivers?.FirstOrDefault(x => x.DriverNumber == driver.Driver_Number);
+                var existingDriver = dbDrivers?.FirstOrDefault(x => x.DriverNumber == driver.DriverNumber);
                 if (existingDriver == null)
                 {
                     var newDriver = driver.ToEntity();
@@ -50,7 +50,7 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
                 }
 
                 // Add team if not exists
-                var existingTeam = dbTeams?.FirstOrDefault(x => x.Name == driver.Team_Name);
+                var existingTeam = dbTeams?.FirstOrDefault(x => x.Name == driver.TeamName);
                 if (existingTeam == null)
                 {
                     var newTeam = driver.ExtractTeam();

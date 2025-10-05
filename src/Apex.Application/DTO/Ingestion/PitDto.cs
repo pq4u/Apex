@@ -1,11 +1,23 @@
-﻿namespace Apex.Application.DTO;
+﻿using System.Text.Json.Serialization;
+
+namespace Apex.Application.DTO.Ingestion;
 
 public class PitDto
 {
     public DateTime Date { get; set; }
-    public int Driver_Number { get; set; }
-    public int Lap_Number { get; set; }
-    public int Meeting_Key { get; set; }
-    public double Pit_Duration { get; set; }
-    public int Session_Key { get; set; }
+    
+    [JsonPropertyName("Driver_Number")]
+    public int DriverNumber { get; set; }
+    
+    [JsonPropertyName("Lap_Number")]
+    public int LapNumber { get; set; }
+    
+    [JsonPropertyName("Meeting_Key")]
+    public int MeetingKey { get; set; }
+    
+    [JsonPropertyName("Pit_Duration")]
+    public double PitDuration { get; set; }
+    
+    [JsonPropertyName("Session_Key")]
+    public int SessionKey { get; set; }
 }

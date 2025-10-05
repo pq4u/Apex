@@ -1,11 +1,21 @@
-﻿namespace Apex.Application.DTO;
+﻿using System.Text.Json.Serialization;
+
+namespace Apex.Application.DTO;
 
 public class IntervalDto
 {
     public DateTime Date { get; set; }
-    public int Driver_Number { get; set; }
-    public double? Gap_To_Leader { get; set; }
+    
+    [JsonPropertyName("Driver_Number")]
+    public int DriverNumber { get; set; }
+    
+    [JsonPropertyName("Gap_To_Leader")]
+    public double? GapToLeader { get; set; }
     public double? Interval { get; set; }
-    public int Meeting_Key { get; set; }
-    public int Session_Key { get; set; }
+    
+    [JsonPropertyName("Meeting_Key")]
+    public int MeetingKey { get; set; }
+    
+    [JsonPropertyName("Session_Key")]
+    public int SessionKey { get; set; }
 }

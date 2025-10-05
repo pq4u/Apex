@@ -41,8 +41,8 @@ public class CreateSessionDriversCommandHandler : ICommandHandler<CreateSessionD
 
             foreach (var driver in driverDtos!)
             {
-                var currentDriver = dbDrivers.First(x => x.DriverNumber == driver.Driver_Number);
-                var currentTeam = dbTeams.First(x => x.Name == driver.Team_Name);
+                var currentDriver = dbDrivers.First(x => x.DriverNumber == driver.DriverNumber);
+                var currentTeam = dbTeams.First(x => x.Name == driver.TeamName);
 
                 var sessionDriver = new SessionDriver()
                 {

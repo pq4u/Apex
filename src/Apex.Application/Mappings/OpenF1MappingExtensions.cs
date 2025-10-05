@@ -1,4 +1,5 @@
-﻿using Apex.Application.DTO;
+﻿using System.Text.Json;
+using Apex.Application.DTO;
 using Apex.Domain.Entities;
 using Apex.Domain.TimeSeries;
 
@@ -8,15 +9,15 @@ public static class OpenF1MappingExtensions
 {
     public static Meeting ToEntity(this MeetingDto dto) => new Meeting
     {
-        Key = dto.Meeting_Key,
-        Name = dto.Meeting_Name,
-        OfficialName = dto.Meeting_Official_Name,
+        Key = dto.MeetingKey,
+        Name = dto.MeetingName,
+        OfficialName = dto.MeetingOfficialName,
         Location = dto.Location,
-        CountryKey = dto.Country_Key,
-        CountryName = dto.Country_Name,
-        CircuitKey = dto.Circuit_Key,
-        CircuitShortName = dto.Circuit_Short_Name,
-        DateStart = dto.Date_Start,
+        CountryKey = dto.CountryKey,
+        CountryName = dto.CountryName,
+        CircuitKey = dto.CircuitKey,
+        CircuitShortName = dto.CircuitShortName,
+        DateStart = dto.DateStart,
         Year = dto.Year
     };
 
@@ -33,14 +34,14 @@ public static class OpenF1MappingExtensions
 
     public static Driver ToEntity(this DriverDto dto) => new Driver
     {
-        DriverNumber = dto.Driver_Number,
-        BroadcastName = dto.Broadcast_Name,
-        FirstName = dto.First_Name,
-        LastName = dto.Last_Name,
-        FullName = dto.Full_Name,
-        NameAcronym = dto.Name_Acronym,
-        HeadshotUrl = dto.Headshot_Url,
-        CountryCode = dto.Country_Code
+        DriverNumber = dto.DriverNumber,
+        BroadcastName = dto.BroadcastName,
+        FirstName = dto.FirstName,
+        LastName = dto.LastName,
+        FullName = dto.FullName,
+        NameAcronym = dto.NameAcronym,
+        HeadshotUrl = dto.HeadshotUrl,
+        CountryCode = dto.CountryCode
     };
     
     public static Stint ToEntity(this StintDto dto, int sessionId, int driverId) => new Stint
@@ -48,34 +49,34 @@ public static class OpenF1MappingExtensions
         SessionId = sessionId,
         DriverId = driverId,
         Compound = dto.Compound,
-        StintNumber = dto.Stint_Number,
-        TyreAgeAtStart = dto.Tyre_Age_At_Start,
-        LapStart = dto.Lap_Start ?? 0,
-        LapEnd = dto.Lap_End ?? 0,
+        StintNumber = dto.StintNumber,
+        TyreAgeAtStart = dto.TyreAgeAtStart,
+        LapStart = dto.LapStart ?? 0,
+        LapEnd = dto.LapEnd ?? 0,
     };
 
     public static Team ExtractTeam(this DriverDto dto) => new Team
     {
-        Name = dto.Team_Name,
-        TeamColour = dto.Team_Colour
+        Name = dto.TeamName,
+        TeamColour = dto.TeamColour
     };
 
     public static Lap ToEntity(this LapDto dto, int sessionId, int driverId) => new Lap
     {
         SessionId = sessionId,
         DriverId = driverId,
-        LapNumber = dto.Lap_Number,
-        DateStart = dto.Date_Start != null ? ((DateTime)dto.Date_Start).ToUniversalTime() : null,
-        LapDurationMs = dto.Lap_Duration.HasValue ? (int)(dto.Lap_Duration.Value * 1000) : null,
-        DurationSector1Ms = dto.Duration_Sector_1.HasValue ? (int)(dto.Duration_Sector_1.Value * 1000) : null,
-        DurationSector2Ms = dto.Duration_Sector_2.HasValue ? (int)(dto.Duration_Sector_2.Value * 1000) : null,
-        DurationSector3Ms = dto.Duration_Sector_3.HasValue ? (int)(dto.Duration_Sector_3.Value * 1000) : null,
-        I1Speed = dto.I1_Speed,
-        I2Speed = dto.I2_Speed,
-        FinishLineSpeed = dto.Finish_Line_Speed,
-        StSpeed = dto.St_Speed,
-        IsPitOutLap = dto.Is_Pit_Out_Lap,
-        SegmentsJson = dto.Segments != null ? System.Text.Json.JsonSerializer.Serialize(dto.Segments) : null
+        LapNumber = dto.LapNumber,
+        DateStart = dto.DateStart?.ToUniversalTime(),
+        LapDurationMs = dto.LapDuration.HasValue ? (int)(dto.LapDuration.Value * 1000) : null,
+        DurationSector1Ms = dto.DurationSector1.HasValue ? (int)(dto.DurationSector1.Value * 1000) : null,
+        DurationSector2Ms = dto.DurationSector2.HasValue ? (int)(dto.DurationSector2.Value * 1000) : null,
+        DurationSector3Ms = dto.DurationSector3.HasValue ? (int)(dto.DurationSector3.Value * 1000) : null,
+        I1Speed = dto.I1Speed,
+        I2Speed = dto.I2Speed,
+        FinishLineSpeed = dto.FinishLineSpeed,
+        StSpeed = dto.StSpeed,
+        IsPitOutLap = dto.IsPitOutLap,
+        SegmentsJson = JsonSerializer.Serialize(dto.Segments)
     };
 
     public static Telemetry ToTimeSeries(this CarDataDto dto, int sessionId, int driverId) => new Telemetry
