@@ -14,9 +14,7 @@ public class DriverController : ControllerBase
     private readonly IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>?> _getSessionDriversQueryHandler;
 
     public DriverController(IQueryHandler<GetSessionDriversQuery, IEnumerable<Driver>?> getSessionDriversQueryHandler)
-    {
-        _getSessionDriversQueryHandler = getSessionDriversQueryHandler;
-    }
+        => _getSessionDriversQueryHandler = getSessionDriversQueryHandler;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DriverResultDto>>> GetDriversInSession([FromQuery] GetSessionDriversQuery command)

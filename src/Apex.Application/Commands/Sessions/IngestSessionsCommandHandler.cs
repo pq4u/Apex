@@ -34,15 +34,14 @@ public class IngestSessionsCommandHandler : ICommandHandler<IngestSessionsComman
         {
             var sessionsDtos = await _apiClient.GetSessionsAsync(command.MeetingKey);
 
-            if (!sessionsDtos.Any())
+            if (!sessionsDtos!.Any())
             {
                 throw new SessionsInMeetingNotFoundInApiException(command.MeetingKey);
             }
             
-            var addedSessions = new List<SessionDto>();
             var meetings = await _meetingRepository.GetAllAsync();
             
-            foreach (var sessionDto in sessionsDtos)
+            foreach (var sessionDto in sessionsDtos!)
             {
                 var exists = await _sessionRepository.ExistsByKeyAsync(sessionDto.Session_Key);
 
@@ -60,8 +59,6 @@ public class IngestSessionsCommandHandler : ICommandHandler<IngestSessionsComman
                     .FirstOrDefault();
                 
                 await _sessionRepository.AddAsync(session);
-
-                addedSessions.Add(sessionDto);
             }
             
             Log.Information("Completed session list ingestion from OpenF1 API");

@@ -9,6 +9,6 @@ public class PitStop
     public DateTime Date { get; set; }
     public decimal PitDuration { get; set; }
 
-    public Session Session { get; set; }
-    public Driver Driver { get; set; }
+    public Session Session { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
 }

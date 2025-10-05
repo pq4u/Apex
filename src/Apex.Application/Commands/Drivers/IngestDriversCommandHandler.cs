@@ -31,7 +31,7 @@ public class IngestDriversCommandHandler : ICommandHandler<IngestDriversCommand>
         {
             var driverDtos = await _apiClient.GetDriversAsync(command.SessionKey);
             
-            Log.Information("Found {Count} drivers for session {SessionKey}", driverDtos.Count, command.SessionKey);
+            Log.Information("Found {Count} drivers for session {SessionKey}", driverDtos!.Count, command.SessionKey);
 
             var dbTeams = (await _teamRepository.GetAllAsync())?.ToList();
             var dbDrivers = (await _driverRepository.GetAllAsync())?.ToList();

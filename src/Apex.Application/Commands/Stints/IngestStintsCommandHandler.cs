@@ -34,14 +34,15 @@ public class IngestStintsCommandHandler : ICommandHandler<IngestStintsCommand>
 
             var dbDrivers = await _driverRepository.GetAllAsync();
             
-            if (stintsExists.Any())
+            if (stintsExists!.Any())
             {
-                Log.Information("Stints already exists in session key {SessionKey}", command.SessionKey);
+                Log.Information("Stints already exist in session key {SessionKey}", command.SessionKey);
+                return;
             }
             
             var stints = await _apiClient.GetStintsAsync(command.SessionKey);
 
-            if (!stints.Any())
+            if (!stints!.Any())
             {
                 // not found in api
             }

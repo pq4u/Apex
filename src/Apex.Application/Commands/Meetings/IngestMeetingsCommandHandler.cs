@@ -29,14 +29,14 @@ public class IngestMeetingsCommandHandler : ICommandHandler<IngestMeetingsComman
         {
             var meetings = await _apiClient.GetMeetingsAsync();
             
-            if (!meetings.Any())
+            if (!meetings!.Any())
             {
                 throw new MeetingsNotFoundInApiException();
             }
             
             var existingDbMeetings = await _meetingRepository.GetAllAsync();
 
-            var meetingsEntities = meetings.Select(m => m.ToEntity()).ToList();
+            var meetingsEntities = meetings!.Select(m => m.ToEntity()).ToList();
 
             foreach (var meeting in meetingsEntities)
             {

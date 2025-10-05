@@ -18,6 +18,6 @@ public class Lap
     public bool IsPitOutLap { get; set; }
     public string? SegmentsJson { get; set; }
 
-    public Session Session { get; set; }
-    public Driver Driver { get; set; }
+    public Session Session { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
 }

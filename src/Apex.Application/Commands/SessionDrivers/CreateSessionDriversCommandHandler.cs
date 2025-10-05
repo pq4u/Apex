@@ -34,12 +34,12 @@ public class CreateSessionDriversCommandHandler : ICommandHandler<CreateSessionD
             var driverDtos = await _apiClient.GetDriversAsync(command.SessionKey);
 
             Log.Information("Creating session-driver associations for {Count} drivers in session {SessionId}",
-                driverDtos.Count, command.SessionId);
+                driverDtos?.Count, command.SessionId);
 
             var dbTeams = await _teamRepository.GetAllAsync();
             var dbDrivers = await _driverRepository.GetAllAsync();
 
-            foreach (var driver in driverDtos)
+            foreach (var driver in driverDtos!)
             {
                 var currentDriver = dbDrivers.First(x => x.DriverNumber == driver.Driver_Number);
                 var currentTeam = dbTeams.First(x => x.Name == driver.Team_Name);

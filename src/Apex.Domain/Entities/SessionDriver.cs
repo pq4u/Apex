@@ -6,7 +6,7 @@ public class SessionDriver
     public int DriverId { get; set; }
     public int TeamId { get; set; }
 
-    public Session Session { get; set; }
-    public Driver Driver { get; set; }
-    public Team Team { get; set; }
+    public Session Session { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
+    public Team Team { get; set; } = null!;
 }

@@ -6,11 +6,11 @@ public class RaceControl
     public int SessionId { get; set; }
     public DateTime Date { get; set; }
     public int? LapNumber { get; set; }
-    public string Category { get; set; }
-    public string Flag { get; set; }
-    public string Message { get; set; }
+    public string Category { get; set; } = null!;
+    public string Flag { get; set; } = null!;
+    public string Message { get; set; } = null!;
     public int? DriverId { get; set; }
 
-    public Session Session { get; set; }
-    public Driver Driver { get; set; }
+    public Session Session { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
 }

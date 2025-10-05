@@ -12,20 +12,18 @@ namespace Apex.Api.Controllers;
 [Route("meetings")]
 public class MeetingController : ControllerBase
 {
-    private readonly IQueryHandler<GetMeetingsQuery, IEnumerable<Meeting>> _getMeetingsQueryHandler;
+    private readonly IQueryHandler<GetMeetingsQuery, IEnumerable<Meeting>?> _getMeetingsQueryHandler;
 
-    public MeetingController(IQueryHandler<GetMeetingsQuery, IEnumerable<Meeting>> getMeetingsQueryHandler)
-    {
-        _getMeetingsQueryHandler = getMeetingsQueryHandler;
-    }
-
+    public MeetingController(IQueryHandler<GetMeetingsQuery, IEnumerable<Meeting>?> getMeetingsQueryHandler)
+        => _getMeetingsQueryHandler = getMeetingsQueryHandler;
+    
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MeetingResultDto>>> Get()
     {
         var query = new GetMeetingsQuery();
         var meetings = await _getMeetingsQueryHandler.HandleAsync(query);
 
-        var response = meetings.Select(x => x.ToResultDto());
+        var response = meetings?.Select(x => x.ToResultDto());
 
         return Ok(response);
 

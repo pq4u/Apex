@@ -14,9 +14,7 @@ public class TelemetryController : ControllerBase
     private readonly IQueryHandler<GetTelemetryQuery, IEnumerable<Telemetry>?> _getTelemetryQueryHandler;
 
     public TelemetryController(IQueryHandler<GetTelemetryQuery, IEnumerable<Telemetry>?> getTelemetryQueryHandler)
-    {
-        _getTelemetryQueryHandler = getTelemetryQueryHandler;
-    }
+        => _getTelemetryQueryHandler = getTelemetryQueryHandler;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TelemetryResultDto>?>> Get([FromQuery] GetTelemetryQuery query)

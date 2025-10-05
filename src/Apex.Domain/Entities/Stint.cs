@@ -9,8 +9,8 @@ public class Stint
     public int LapStart { get; set; }
     public int LapEnd { get; set; }
     public int? TyreAgeAtStart { get; set; }
-    public string Compound { get; set; }
+    public string Compound { get; set; } = null!;
 
-    public Session Session { get; set; }
-    public Driver Driver { get; set; }
+    public Session Session { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
 }

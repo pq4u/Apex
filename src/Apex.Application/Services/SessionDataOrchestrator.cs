@@ -54,20 +54,20 @@ public class SessionDataOrchestrator : ISessionDataOrchestrator
                 await _ingestLapsHandler.HandleAsync(new IngestLapsCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id));
             }
 
-            // foreach (var driver in drivers)
-            // {
-            //     Log.Information("Starting car data ingestion for driver {DriverNumber}", driver.DriverNumber);
-            //
-            //     try
-            //     {
-            //         await _ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id, sessionStartDate));
-            //         Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         Log.Error("Failed to ingest car data for driver {DriverNumber}: {Error}", driver.DriverNumber, ex.Message);
-            //     }
-            // }
+            foreach (var driver in drivers)
+            {
+                Log.Information("Starting car data ingestion for driver {DriverNumber}", driver.DriverNumber);
+            
+                try
+                {
+                    await _ingestCarDataHandler.HandleAsync(new IngestCarDataCommand(sessionKey, sessionId, driver.DriverNumber, driver.Id, sessionStartDate));
+                    Log.Information("Successfully completed car data ingestion for driver {DriverNumber}", driver.DriverNumber);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to ingest car data for driver {DriverNumber}: {Error}", driver.DriverNumber, ex.Message);
+                }
+            }
             
             Log.Information("Completed session data ingestion for session key {SessionKey}", sessionKey);
         }
